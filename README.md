@@ -18,7 +18,7 @@ Ningún color de tu paleta queda descartado  — cada uno recibe un rol adecuado
 Genera escalas perceptualmente uniformes de color (50→950) donde el valor 500 es exáctamente el color puro de marca. Se trata del mismo algoritmo de color que usa Tailwind v3, Radix UI y CSS Color Level 4.
 
 ### Jerarquía inteligente con razonamiento
-Puede asignar hasta 8 roles primarios y hasta 8 roles de estado evaluando propiedades reales de cada color, tales como: saturación, luminosidad, matiz y contraste. Cada decisión viene con una explicación, no solo te arroja un resultado.
+Puede asignar roles primarios y roles de estado evaluando propiedades reales de cada color mediante la etiqueta de texto editable ubicada justo al lado del hex input, tales como: saturación, luminosidad, matiz y contraste. Cada decisión viene con una explicación, no solo te arroja un resultado.
 
 ### WCAG 2.1
 Validación del contraste entre pares reales de la interfaz. Evalúa texto negro y blanco sobre cada botón y elige el de mayor ratio. Muestra niveles AA, AAA y advertencias contextuales.
