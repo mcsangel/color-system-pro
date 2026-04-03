@@ -41,7 +41,7 @@ Si tu color primario es un color brillante que no pasa contrastes sobre fondos c
 
 ## Tecnología implementada
 
-- **Vanilla HTML/CSS/JS** — sin frameworks, sin dependencias, con un peso de 85kb, y apto para funcionar offline
+- **Vanilla HTML** — sin frameworks, sin dependencias, con un peso de 85kb, y apto para funcionar offline
 - **OKLCH color math** — implementado desde cero sin uso de librerías externas
 - **WCAG 2.1** — uso de cálculo de luminancia relativa según especificación de contraste W3C
 - **CVD simulation** — matrices de transformación para deuteranopia, protanopia y tritanopia
