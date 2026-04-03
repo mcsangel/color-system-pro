@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color System Pro — by MCSangel</title>
+<meta name="description" content="Genera sistemas de color profesionales con OKLCH, validación WCAG 2.1, simulación CVD y jerarquía semántica inteligente.">
+<meta name="author" content="MCSangel">
+<meta property="og:title" content="Color System Pro">
+<meta property="og:description" content="Herramienta de design tokens con OKLCH · WCAG 2.1 · CVD · Roles semánticos">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@700;800;900&display=swap');
+
+:root{
+  --ink:#1a1a1a;
+  --ink2:#666;
+  --ink3:#aaa;
+  --ink4:#ccc;
+  --bg:#f2f1ee;
+  --surface:#fff;
+  --border:rgba(0,0,0,0.08);
+  --border-hover:rgba(0,0,0,0.22);
+  --radius:14px;
+  --radius-sm:9px;
+  --ease:cubic-bezier(.34,1.56,.64,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+
+body{
+  font-family:'Syne',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  padding:2.5rem 1rem 5rem;
+}
+
+/* subtle dot-grid background */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:radial-gradient(circle,rgba(0,0,0,.06) 1px,transparent 1px);
+  background-size:22px 22px;
+  pointer-events:none;
+  z-index:0;
+}
+
+.wrap{max-width:900px;margin:0 auto;position:relative;z-index:1;}
+
+/* ── Header ── */
+.hd{margin-bottom:2.5rem;animation:fadeUp .6s var(--ease-out) both;}
+.hd h1{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:58px;font-weight:900;
+  letter-spacing:0.06em;line-height:1;
+  text-transform:uppercase;
+  color:var(--ink);
+  display:flex;align-items:baseline;gap:6px;
+}
+.hd h1 .pro{
+  font-size:28px;font-weight:700;
+  color:#888;letter-spacing:0.08em;
+  vertical-align:baseline;
+  position:static;top:auto;
+}
+body.app-dark .hd h1{color:var(--ink);}
+body.app-dark .hd h1 .pro{color:#bbb;}
+.hd-sub{
+  display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap;
+}
+.hd p{font-size:11px;font-family:'DM Mono',monospace;color:var(--ink3);}
+.hd-badge{
+  font-size:10px;font-family:'DM Mono',monospace;
+  padding:4px 8px 4px 9px;border-radius:99px;
+  border:0.5px solid var(--border-hover);
+  color:var(--ink3);letter-spacing:.04em;
+  background:none;
+  display:inline-flex;align-items:center;gap:5px;
+  animation:pulse 3s ease-in-out infinite;
+  position:relative;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── Cards ── */
+.card{
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.5rem;
+  margin-bottom:.875rem;
+  transition:border-color .2s;
+  animation:fadeUp .5s var(--ease-out) both;
+}
+.card:hover{border-color:rgba(0,0,0,.13);}
+.card-accent{
+  border-top:2.5px solid var(--ink);
+  border-radius:0 0 var(--radius) var(--radius);
+  border-top-left-radius:var(--radius);
+  border-top-right-radius:var(--radius);
+  position:relative;
+  overflow:hidden;
+}
+.card-accent::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2.5px;
+  background:linear-gradient(90deg,#4F7FFF,#a855f7,#ec4899,#f97316,#eab308,#4F7FFF);
+  background-size:300% 100%;
+  animation:shimmer 8s linear infinite;
+}
+@keyframes shimmer{0%{background-position:0% 0}100%{background-position:300% 0}}
+
+.stitle{
+  font-size:15px;font-weight:700;letter-spacing:-.025em;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.stitle-badge{
+  font-size:9px;font-family:'DM Mono',monospace;color:var(--ink3);
+  background:var(--bg);border-radius:99px;padding:2px 8px;
+  border:0.5px solid var(--border);font-weight:400;
+}
+.lbl{
+  font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;
+  display:flex;align-items:center;gap:6px;
+}
+.lbl::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.4;}
+.divider{border:none;border-top:0.5px solid var(--border);margin:1.1rem 0;}
+
+/* ── Color inputs ── */
+.irow{
+  display:flex;align-items:center;gap:8px;margin-bottom:8px;
+  animation:fadeUp .25s var(--ease) both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.cprev{
+  width:36px;height:36px;border-radius:10px;
+  border:0.5px solid var(--border);flex-shrink:0;
+  transition:transform .25s var(--ease),box-shadow .25s;
+  cursor:default;
+}
+.cprev:hover{transform:scale(1.14) rotate(-3deg);box-shadow:0 4px 16px rgba(0,0,0,.14);}
+
+.hinput{
+  font-size:13px;font-family:'DM Mono',monospace;width:118px;
+  border-radius:var(--radius-sm);border:0.5px solid var(--border);
+  padding:0 10px;height:36px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+  background:var(--bg);color:var(--ink);
+}
+.hinput:focus{
+  border-color:var(--ink);
+  box-shadow:0 0 0 3px rgba(0,0,0,.06);
+  background:var(--surface);
+}
+.ninput{
+  font-size:13px;font-family:'Syne',sans-serif;
+  background:none;border:none;color:var(--ink3);
+  outline:none;flex:1;min-width:60px;
+  transition:color .15s;
+}
+.ninput:focus{color:var(--ink);}
+.rmbtn{
+  font-size:18px;color:var(--ink4);background:none;border:none;
+  cursor:pointer;padding:0 4px;line-height:1;
+  transition:color .15s,transform .3s var(--ease);
+}
+.rmbtn:hover{color:#E24B4A;transform:rotate(90deg) scale(1.1);}
+
+.addbtn{
+  font-size:13px;font-family:'Syne',sans-serif;color:var(--ink3);
+  background:none;border:0.5px dashed rgba(0,0,0,.16);
+  border-radius:var(--radius-sm);padding:10px 16px;
+  cursor:pointer;width:100%;margin-top:4px;
+  transition:all .2s;letter-spacing:.01em;
+}
+.addbtn:hover{
+  background:var(--bg);color:var(--ink);
+  border-color:var(--ink);border-style:solid;
+}
+
+.genbtn{
+  background:var(--ink);color:#fff;border:none;
+  border-radius:var(--radius-sm);padding:13px 24px;
+  font-size:14px;font-weight:700;font-family:'Syne',sans-serif;
+  cursor:pointer;width:100%;margin-top:10px;letter-spacing:-.01em;
+  position:relative;overflow:hidden;
+  transition:transform .2s var(--ease),opacity .2s;
+}
+.genbtn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);
+  transform:translateX(-100%);transition:transform .5s;
+}
+.genbtn:hover{transform:translateY(-2px);opacity:.9;}
+.genbtn:hover::after{transform:translateX(100%);}
+.genbtn:active{transform:translateY(0) scale(.98);}
+
+/* ── Upload area ── */
+.uparea{
+  border:0.5px dashed rgba(0,0,0,.15);border-radius:var(--radius-sm);
+  padding:1.25rem;text-align:center;cursor:pointer;margin-top:8px;
+  transition:all .25s;position:relative;overflow:hidden;
+}
+.uparea:hover{background:var(--bg);border-color:var(--ink);}
+.uparea.dragging{
+  background:#f0f4ff;border-color:#4F7FFF;border-style:solid;
+  transform:scale(1.01);
+}
+.up-icon{
+  font-size:20px;display:block;margin-bottom:6px;
+  transition:transform .3s var(--ease);
+}
+.uparea:hover .up-icon{transform:translateY(-3px);}
+
+/* ── Mode toggle ── */
+.mtoggle{
+  display:flex;gap:3px;margin-bottom:1.25rem;
+  background:rgba(0,0,0,.06);padding:3px;
+  border-radius:10px;width:fit-content;
+}
+.mbtn{
+  font-size:12px;font-family:'Syne',sans-serif;font-weight:700;
+  padding:6px 18px;border-radius:7px;border:none;cursor:pointer;
+  background:none;color:var(--ink3);
+  transition:all .2s var(--ease-out);
+}
+.mbtn.on{
+  background:var(--surface);color:var(--ink);
+  box-shadow:0 1px 6px rgba(0,0,0,.1);
+}
+
+/* ── Role cards ── */
+.roles-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.rcard{
+  border-radius:var(--radius);border:0.5px solid var(--border);
+  overflow:hidden;background:var(--surface);
+  transition:transform .25s var(--ease),border-color .2s,box-shadow .25s;
+  animation:fadeUp .4s var(--ease-out) both;
+}
+.rcard:hover{
+  transform:translateY(-3px);
+  border-color:rgba(0,0,0,.15);
+  box-shadow:0 8px 24px rgba(0,0,0,.07);
+}
+.rcard-color-strip{
+  height:8px;transition:height .3s var(--ease);
+}
+.rcard:hover .rcard-color-strip{height:12px;}
+.rcard-body{padding:14px;}
+.rcard-title{
+  font-size:13px;font-weight:700;margin-bottom:3px;
+  display:flex;align-items:center;gap:7px;
+}
+.rcard-dot{
+  width:11px;height:11px;border-radius:50%;flex-shrink:0;
+  border:0.5px solid rgba(0,0,0,.1);
+  transition:transform .25s var(--ease);
+}
+.rcard:hover .rcard-dot{transform:scale(1.25);}
+.rcard-desc{
+  font-size:11px;color:var(--ink3);
+  font-family:'DM Mono',monospace;margin-bottom:10px;
+}
+.rcard-select{
+  font-size:12px;font-family:'DM Mono',monospace;
+  border:0.5px solid var(--border);border-radius:var(--radius-sm);
+  padding:7px 9px;background:var(--bg);color:var(--ink);
+  outline:none;width:100%;cursor:pointer;
+  transition:border-color .2s,box-shadow .2s;margin-bottom:8px;
+  appearance:auto;
+}
+.rcard-select:focus{
+  border-color:var(--ink);
+  box-shadow:0 0 0 3px rgba(0,0,0,.06);
+}
+.rcard-meta{font-size:10px;font-family:'DM Mono',monospace;color:var(--ink4);margin-bottom:7px;}
+
+/* ── Reasoning ── */
+.reasoning{
+  background:var(--bg);border-radius:var(--radius-sm);
+  padding:10px 12px;margin-top:4px;
+  border-left:2px solid rgba(0,0,0,.1);
+}
+.reasoning-winner{
+  font-size:11px;font-family:'DM Mono',monospace;
+  color:var(--ink);margin-bottom:6px;line-height:1.55;
+}
+.reasoning-rejected{margin-top:7px;}
+.reasoning-rejected-title{
+  font-size:9px;font-family:'DM Mono',monospace;color:var(--ink4);
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;
+}
+.rejected-item{
+  font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);
+  margin-bottom:3px;display:flex;gap:6px;
+  align-items:flex-start;line-height:1.45;
+}
+.rejected-dot{
+  width:8px;height:8px;border-radius:50%;
+  flex-shrink:0;margin-top:2px;opacity:.7;
+}
+
+/* ── WCAG badges ── */
+.badge{
+  display:inline-flex;align-items:center;
+  font-size:9px;font-family:'DM Mono',monospace;
+  padding:2px 8px;border-radius:99px;letter-spacing:.02em;
+}
+.pass{background:#E6F5D0;color:#2D6A0A;}
+.warn{background:#FEF3C0;color:#854F0B;}
+.fail{background:#FEE2E2;color:#991B1B;}
+.info{background:#DBEAFE;color:#1E40AF;}
+
+/* ── CVD strip ── */
+.cvd-strip{display:flex;gap:2px;margin-top:7px;border-radius:4px;overflow:hidden;}
+.cvd-sw{flex:1;height:9px;transition:height .2s var(--ease);}
+.rcard:hover .cvd-sw{height:13px;}
+.cvd-lbl{
+  font-size:8px;font-family:'DM Mono',monospace;
+  color:var(--ink4);margin-top:3px;
+  display:flex;gap:4px;
+}
+.cvd-lbl span{flex:1;text-align:center;}
+
+/* ── Scale ── */
+.scl-wrap{
+  display:flex;gap:2px;border-radius:10px;
+  overflow:hidden;
+}
+.scl-cell{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.scl-sw{
+  width:100%;height:36px;cursor:pointer;
+  transition:transform .2s var(--ease),filter .2s;
+  position:relative;
+}
+.scl-sw:hover{
+  transform:scaleY(1.3);
+  filter:brightness(1.05);
+  z-index:1;
+}
+.scl-sw.pin{
+  outline:2px solid var(--ink);
+  outline-offset:-2px;
+}
+.scl-sw.pin::after{
+  content:'★';
+  position:absolute;bottom:2px;left:50%;
+  transform:translateX(-50%);
+  font-size:7px;color:rgba(0,0,0,.35);
+  line-height:1;
+}
+.scl-num{font-size:8px;font-family:'DM Mono',monospace;color:var(--ink4);}
+
+/* ── Summary ── */
+.sumgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.1rem;}
+.scard{
+  background:var(--bg);border-radius:var(--radius-sm);
+  padding:.9rem;transition:transform .2s var(--ease);
+  border:0.5px solid transparent;
+}
+.scard:hover{transform:translateY(-2px);border-color:var(--border-hover);}
+.sval{font-size:22px;font-weight:800;font-family:'Syne',sans-serif;}
+.slbl{font-size:10px;color:var(--ink3);margin-top:2px;font-family:'DM Mono',monospace;}
+
+/* ── Palette swatches ── */
+.swatch-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.2rem;}
+.swatch-item{
+  display:flex;flex-direction:column;align-items:center;
+  gap:5px;cursor:pointer;
+  transition:transform .25s var(--ease);
+}
+.swatch-item:hover{transform:translateY(-4px);}
+.swatch-box{
+  width:48px;height:48px;border-radius:12px;
+  border:0.5px solid rgba(0,0,0,.08);
+  transition:box-shadow .25s,border-radius .25s var(--ease);
+  position:relative;overflow:hidden;
+}
+.swatch-item:hover .swatch-box{
+  box-shadow:0 8px 20px rgba(0,0,0,.15);
+  border-radius:14px;
+}
+.swatch-box::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(255,255,255,.15);
+  opacity:0;transition:opacity .2s;
+}
+.swatch-item:hover .swatch-box::after{opacity:1;}
+.swatch-lbl{
+  font-size:9px;font-family:'DM Mono',monospace;
+  color:var(--ink3);text-align:center;max-width:52px;
+  line-height:1.3;
+}
+
+/* ── Preview ── */
+.pv-box{border-radius:14px;padding:1.5rem;}
+.pv-nav{
+  display:flex;align-items:center;gap:8px;
+  padding-bottom:12px;margin-bottom:14px;
+}
+.pv-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.pv-card{
+  border-radius:11px;padding:15px;
+  transition:transform .2s var(--ease);
+}
+.pv-card:hover{transform:translateY(-2px);}
+.pv-badge{
+  font-size:11px;padding:3px 11px;border-radius:99px;
+  font-family:'DM Mono',monospace;display:inline-block;
+}
+.pv-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.pv-btn{
+  border-radius:9px;padding:10px 20px;font-size:13px;
+  font-weight:700;font-family:'Syne',sans-serif;
+  cursor:pointer;border:none;
+  transition:transform .2s var(--ease),opacity .15s,filter .15s;
+}
+.pv-btn:hover{transform:translateY(-2px);filter:brightness(1.08);}
+.pv-btn:active{transform:scale(.97);}
+.pv-btn-ghost{
+  border-radius:9px;padding:10px 20px;font-size:13px;
+  font-family:'Syne',sans-serif;cursor:pointer;background:transparent;
+  transition:transform .2s var(--ease),background .15s;
+}
+.pv-btn-ghost:hover{transform:translateY(-2px);}
+.contrast-panel{border-radius:10px;padding:.9rem;}
+.cr-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px;}
+.cr-row{
+  display:flex;flex-direction:column;gap:3px;
+  padding:8px;background:rgba(255,255,255,.4);
+  border-radius:8px;transition:background .2s;
+}
+.cr-row:hover{background:rgba(255,255,255,.7);}
+.cr-pair{font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);}
+.cr-val{font-size:11px;font-family:'DM Mono',monospace;}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;bottom:28px;left:50%;
+  transform:translateX(-50%) translateY(8px);
+  background:var(--ink);color:#fff;
+  font-size:12px;font-family:'DM Mono',monospace;
+  padding:9px 20px;border-radius:99px;
+  opacity:0;transition:opacity .25s,transform .25s var(--ease);
+  pointer-events:none;z-index:999;
+  display:flex;align-items:center;gap:8px;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-check{
+  width:16px;height:16px;border-radius:50%;
+  background:rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;
+}
+
+/* ── Ext chips ── */
+.ext-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+.ext-chip{
+  display:flex;align-items:center;gap:7px;
+  background:var(--bg);border-radius:99px;
+  padding:5px 12px 5px 5px;
+  font-size:11px;font-family:'DM Mono',monospace;color:var(--ink2);
+  border:0.5px solid var(--border);cursor:pointer;
+  transition:all .2s var(--ease);
+}
+.ext-chip:hover{
+  border-color:var(--ink);
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+.ext-dot{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  border:0.5px solid rgba(0,0,0,.08);
+  transition:transform .25s var(--ease);
+}
+.ext-chip:hover .ext-dot{transform:scale(1.15);}
+
+/* ── Staggered animation for results ── */
+#results .card:nth-child(1){animation-delay:.05s;}
+#results .card:nth-child(2){animation-delay:.1s;}
+#results .card:nth-child(3){animation-delay:.15s;}
+#results .card:nth-child(4){animation-delay:.2s;}
+.roles-grid .rcard:nth-child(1){animation-delay:.1s;}
+.roles-grid .rcard:nth-child(2){animation-delay:.15s;}
+.roles-grid .rcard:nth-child(3){animation-delay:.2s;}
+.roles-grid .rcard:nth-child(4){animation-delay:.25s;}
+.roles-grid .rcard:nth-child(5){animation-delay:.3s;}
+.roles-grid .rcard:nth-child(6){animation-delay:.35s;}
+.roles-grid .rcard:nth-child(7){animation-delay:.4s;}
+.roles-grid .rcard:nth-child(8){animation-delay:.45s;}
+
+/* ── App dark mode ── */
+body.app-dark{
+  --ink:#f0efe9;
+  --ink2:#aaa;
+  --ink3:#666;
+  --ink4:#444;
+  --bg:#141414;
+  --surface:#1e1e1e;
+  --border:rgba(255,255,255,.08);
+  --border-hover:rgba(255,255,255,.22);
+}
+body.app-dark .hd h1{
+  background:linear-gradient(135deg,#f0efe9 0%,#888 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+body.app-dark .hinput{background:var(--surface);color:var(--ink);}
+body.app-dark .rcard-select{background:#262626;color:var(--ink);}
+body.app-dark .reasoning{background:#262626;}
+body.app-dark .exp-pre{background:#262626;color:#c9d1d9;}
+body.app-dark .exp-box{background:#1a1a1a;border-color:rgba(255,255,255,.08);}
+/* Fix genbtn in dark mode — needs high contrast */
+body.app-dark .genbtn{background:#f0efe9;color:#141414;}
+body.app-dark .genbtn:hover{opacity:.92;}
+/* Fix toast in dark mode */
+body.app-dark .toast{background:#f0efe9;color:#141414;}
+body.app-dark .toast-check{background:rgba(0,0,0,.12);color:#141414;}
+
+.app-dark-btn{
+  font-size:12px;font-family:'DM Mono',monospace;
+  padding:6px 14px;border-radius:99px;
+  border:0.5px solid var(--border-hover);
+  background:none;color:var(--ink3);cursor:pointer;
+  transition:all .2s var(--ease);
+  display:flex;align-items:center;gap:6px;
+}
+.app-dark-btn:hover{background:var(--surface);color:var(--ink);border-color:var(--ink);}
+body.app-dark .app-dark-btn{background:var(--surface);}
+
+/* ── Export panel ── */
+.exp-semantic{
+  display:flex;gap:8px;align-items:center;
+  margin-bottom:14px;flex-wrap:wrap;
+}
+.exp-semantic-label{
+  font-size:11px;font-family:'DM Mono',monospace;
+  color:var(--ink3);white-space:nowrap;
+}
+.exp-prefix-input{
+  font-size:12px;font-family:'DM Mono',monospace;
+  border:0.5px solid var(--border);border-radius:6px;
+  padding:5px 9px;height:30px;outline:none;
+  background:var(--bg);color:var(--ink);
+  width:140px;transition:border-color .2s,box-shadow .2s;
+}
+.exp-prefix-input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(0,0,0,.06);}
+.exp-role-names{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;
+}
+.exp-role-row{display:flex;align-items:center;gap:7px;}
+.exp-role-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.exp-role-key{
+  font-size:10px;font-family:'DM Mono',monospace;
+  color:var(--ink3);width:90px;flex-shrink:0;
+}
+.exp-role-input{
+  font-size:11px;font-family:'DM Mono',monospace;
+  border:0.5px solid var(--border);border-radius:5px;
+  padding:4px 7px;height:26px;outline:none;
+  background:var(--bg);color:var(--ink);flex:1;
+  transition:border-color .15s;
+}
+.exp-role-input:focus{border-color:var(--ink);}
+.exp-tabs{display:flex;gap:4px;margin-bottom:12px;}
+.exp-tab{
+  font-size:12px;font-family:'DM Mono',monospace;
+  padding:6px 14px;border-radius:var(--radius-sm);
+  border:0.5px solid var(--border);
+  background:none;color:var(--ink3);cursor:pointer;
+  transition:all .2s var(--ease);
+}
+.exp-tab:hover{color:var(--ink);border-color:var(--border-hover);}
+.exp-tab.on{background:var(--ink);color:var(--bg);border-color:transparent;}
+.exp-box{
+  position:relative;background:var(--bg);
+  border:0.5px solid var(--border);
+  border-radius:var(--radius-sm);overflow:hidden;
+}
+.exp-copy{
+  position:absolute;top:10px;right:10px;
+  font-size:11px;font-family:'DM Mono',monospace;
+  padding:5px 12px;border-radius:6px;
+  border:0.5px solid var(--border-hover);
+  background:var(--surface);color:var(--ink2);
+  cursor:pointer;transition:all .2s var(--ease);z-index:2;
+}
+.exp-copy:hover{background:var(--ink);color:var(--bg);}
+.exp-copy.copied{background:#22c55e;color:#fff;border-color:transparent;}
+.exp-pre{
+  font-size:11px;font-family:'DM Mono',monospace;
+  color:var(--ink2);padding:1.1rem;
+  white-space:pre;overflow-x:auto;
+  line-height:1.7;max-height:320px;overflow-y:auto;tab-size:2;
+}
+.exp-hint{font-size:10px;font-family:'DM Mono',monospace;color:var(--ink4);margin-top:10px;line-height:1.5;}
+
+/* ── Input validation ── */
+.hinput.invalid{
+  border-color:#ef4444;
+  box-shadow:0 0 0 3px rgba(239,68,68,.1);
+  animation:shake .3s ease;
+}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.hinput.valid{border-color:#22c55e;}
+
+/* ── Role change animation — slower, smooth color fade ── */
+@keyframes stripFade{
+  0%  {opacity:0;transform:scaleX(0.5);}
+  40% {opacity:.7;}
+  100%{opacity:1;transform:scaleX(1);}
+}
+.rcard-color-strip{transition:background-color 1.2s ease;}
+.rcard-color-strip.animating{
+  animation:stripFade .9s cubic-bezier(.22,1,.36,1) both;
+}
+
+/* ── Tooltip / help ── */
+.help-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;
+  border:0.5px solid var(--border-hover);
+  font-size:10px;font-family:'DM Mono',monospace;
+  color:var(--ink3);cursor:pointer;background:none;
+  transition:background .15s,color .15s,border-color .15s;
+  flex-shrink:0;line-height:1;
+}
+.help-wrap{display:inline-flex;align-items:center;}
+.help-tip{
+  position:fixed;
+  background:#1a1a1a;color:#f0efe9;
+  font-size:11px;font-family:'DM Mono',monospace;
+  padding:12px 14px;border-radius:10px;
+  width:280px;line-height:1.6;
+  opacity:0;pointer-events:none;
+  transition:opacity .15s;
+  z-index:9999;text-align:left;white-space:normal;
+  top:0;left:0;
+}
+.help-tip.visible{opacity:1;pointer-events:auto;}
+.help-tip::after{
+  content:'';position:absolute;left:14px;
+  border:6px solid transparent;
+}
+.help-tip:not([data-dir='below'])::after{
+  top:100%;
+  border-top-color:#1a1a1a;
+}
+.help-tip[data-dir='below']::after{
+  bottom:100%;
+  border-bottom-color:#1a1a1a;
+}
+/* ── Footer ── */
+.footer{
+  margin-top:4rem;padding:2rem 0 1rem;
+  border-top:0.5px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.footer-brand{display:flex;align-items:center;gap:10px;}
+.footer-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink);
+}
+.footer-tag{
+  font-size:10px;font-family:'DM Mono',monospace;
+  color:var(--ink3);line-height:1.5;
+}
+.footer-links{display:flex;gap:16px;align-items:center;}
+.footer-link{
+  font-size:11px;font-family:'DM Mono',monospace;color:var(--ink3);
+  text-decoration:none;transition:color .2s;
+}
+.footer-link:hover{color:var(--ink);}
+.footer-copy{
+  font-size:10px;font-family:'DM Mono',monospace;
+  color:var(--ink4);width:100%;margin-top:8px;
+}
+
+/* ── Image loading state ── */
+.uparea.loading{
+  border-style:solid;border-color:var(--ink3);
+  pointer-events:none;
+}
+.up-loading{
+  display:none;align-items:center;justify-content:center;gap:10px;
+  font-size:12px;font-family:'DM Mono',monospace;color:var(--ink3);
+}
+.uparea.loading .up-static{display:none;}
+.uparea.loading .up-loading{display:flex;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.spin{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid var(--border-hover);
+  border-top-color:var(--ink);
+  animation:spin .7s linear infinite;flex-shrink:0;
+}
+
+/* ── Inline error message ── */
+.input-error{
+  font-size:10px;font-family:'DM Mono',monospace;
+  color:#ef4444;margin-top:4px;
+  display:none;animation:fadeUp .2s var(--ease) both;
+}
+.input-error.show{display:block;}
+.genbtn-error{
+  font-size:12px;font-family:'DM Mono',monospace;
+  color:#ef4444;background:#FEF2F2;
+  border:0.5px solid #FECACA;border-radius:var(--radius-sm);
+  padding:0 14px;margin-top:8px;
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .3s var(--ease-out), opacity .25s, padding .3s;
+  line-height:1.5;
+}
+.genbtn-error.show{
+  max-height:80px;opacity:1;
+  padding:10px 14px;
+}
+/* ── Onboarding ── */
+.onboard-card{
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.5rem;margin-bottom:1rem;
+  animation:fadeUp .5s var(--ease-out) both;
+  transition:opacity .3s,transform .3s var(--ease),max-height .4s var(--ease-out);
+  overflow:hidden;max-height:400px;
+}
+.onboard-card.dismissed{
+  opacity:0;transform:translateY(-8px);
+  max-height:0;padding:0;margin:0;pointer-events:none;
+}
+.onboard-steps{
+  display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;
+  align-items:start;gap:0;margin-bottom:1.25rem;
+}
+.onboard-step{
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;gap:8px;padding:0 8px;
+}
+.onboard-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:var(--bg);
+  font-size:13px;font-weight:700;font-family:'Syne',sans-serif;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.onboard-text{
+  display:flex;flex-direction:column;gap:3px;
+}
+.onboard-text strong{
+  font-size:12px;font-weight:700;color:var(--ink);
+}
+.onboard-text span{
+  font-size:11px;font-family:'DM Mono',monospace;
+  color:var(--ink3);line-height:1.5;
+}
+.onboard-divider{
+  width:1px;background:var(--border);
+  align-self:stretch;margin:14px 0;
+}
+.onboard-close{
+  width:100%;font-size:13px;font-weight:700;
+  font-family:'Syne',sans-serif;
+  background:none;border:0.5px solid var(--border-hover);
+  border-radius:var(--radius-sm);padding:10px;
+  color:var(--ink2);cursor:pointer;
+  transition:all .2s var(--ease);
+}
+.onboard-close:hover{
+  background:var(--ink);color:var(--bg);border-color:transparent;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hd">
+  <h1>Color System<span class="pro">Pro</span></h1>
+  <div class="hd-sub">
+    <p>Jerarquía inteligente con razonamiento</p>
+    <button class="hd-badge" style="cursor:default;">
+      OKLCH
+      <span class="help-wrap" data-tip="OKLCH es el espacio de color perceptualmente uniforme usado por Tailwind v3, Radix UI y CSS Color Level 4. Garantiza que los pasos de tu escala se vean equidistantes visualmente — no solo matemáticamente como en HSL."><span class="help-btn">?</span></span>
+    </button>
+    <button class="hd-badge" style="cursor:default;">
+      WCAG 2.1
+      <span class="help-wrap" data-tip="Web Content Accessibility Guidelines. Define el contraste mínimo entre texto y fondo: AA requiere 4.5:1 para texto normal y 3:1 para texto grande. AAA requiere 7:1. Esta herramienta valida cada rol contra su fondo real."><span class="help-btn">?</span></span>
+    </button>
+    <button class="hd-badge" style="cursor:default;">
+      CVD
+      <span class="help-wrap" data-tip="Color Vision Deficiency — daltonismo. Simula cómo ven tus colores personas con deuteranopia (rojo-verde, más común), protanopia (rojo) y tritanopia (azul-amarillo). Afecta al ~8% de hombres y ~0.5% de mujeres."><span class="help-btn">?</span></span>
+    </button>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="onboard-card" id="onboard">
+  <div class="onboard-steps">
+    <div class="onboard-step">
+      <div class="onboard-num">1</div>
+      <div class="onboard-text">
+        <strong>Ingresa tus colores de marca</strong>
+        <span>Pega el hex exacto de cada color. Puedes agregar hasta 5.</span>
+      </div>
+    </div>
+    <div class="onboard-divider"></div>
+    <div class="onboard-step">
+      <div class="onboard-num">2</div>
+      <div class="onboard-text">
+        <strong>O sube una captura de pantalla</strong>
+        <span>La herramienta extrae los colores dominantes automáticamente.</span>
+      </div>
+    </div>
+    <div class="onboard-divider"></div>
+    <div class="onboard-step">
+      <div class="onboard-num">3</div>
+      <div class="onboard-text">
+        <strong>Genera y edita los roles</strong>
+        <span>El sistema asigna roles semánticos con razonamiento. Puedes cambiar cualquier asignación.</span>
+      </div>
+    </div>
+    <div class="onboard-divider"></div>
+    <div class="onboard-step">
+      <div class="onboard-num">4</div>
+      <div class="onboard-text">
+        <strong>Exporta listo para producción</strong>
+        <span>CSS Variables, JSON Tokens o Tailwind Config con tu semántica personalizada.</span>
+      </div>
+    </div>
+  </div>
+  <button class="onboard-close" onclick="dismissOnboard()">Entendido, comenzar →</button>
+</div>
+
+<!-- INPUT -->
+<div class="card card-accent">
+  <p class="lbl">Colores de marca</p>
+  <div id="ci"></div>
+  <button class="addbtn" onclick="addColor()">+ agregar color</button>
+  <hr class="divider">
+  <p class="lbl">O sube una imagen</p>
+  <div class="uparea" id="dz" onclick="document.getElementById('iup').click()">
+    <div class="up-static">
+      <span class="up-icon">↑</span>
+      <p style="font-size:13px;color:var(--ink2);font-weight:700;">Arrastra o haz clic</p>
+      <p style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink4);margin-top:4px;">PNG · JPG — extrae colores dominantes saturados</p>
+    </div>
+    <div class="up-loading">
+      <div class="spin"></div>
+      <span>Analizando imagen…</span>
+    </div>
+  </div>
+  <div id="ext-chips" class="ext-chips" style="display:none;"></div>
+  <input type="file" id="iup" accept="image/*" style="display:none" onchange="extractImg(event)">
+  <canvas id="ic" style="display:none"></canvas>
+  <button class="genbtn" onclick="generate()">Analizar y generar sistema →</button>
+  <div class="genbtn-error" id="genbtn-error"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="results" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px;">
+    <div class="mtoggle" style="margin-bottom:0;">
+      <button class="mbtn on" onclick="setMode('light',this)">Sistema claro</button>
+      <button class="mbtn" onclick="setMode('dark',this)">Sistema oscuro</button>
+    </div>
+    <button class="app-dark-btn" onclick="toggleAppDark()" id="app-dark-btn" title="Modo oscuro de la app">
+      <span id="app-dark-icon">◐</span> App oscura
+    </button>
+  </div>
+  <div id="sum" class="card"></div>
+  <div class="card">
+    <p class="stitle">Roles del sistema <span class="stitle-badge">sugeridos · editables</span></p>
+    <div class="roles-grid" id="role-grid"></div>
+  </div>
+  <div class="card" id="state-roles-card" style="display:none;">
+    <p class="stitle">Colores de estado <span class="stitle-badge">todos tus colores tienen un rol</span></p>
+    <div id="state-role-grid"></div>
+  </div>
+  <div id="scales" class="card"></div>
+  <div class="card">
+    <p class="stitle">Vista previa</p>
+    <div id="preview"></div>
+  </div>
+  <div class="card" id="export-card">
+    <p class="stitle">Exportar sistema <span class="stitle-badge">listo para producción</span></p>
+    <div class="exp-semantic">
+      <span class="exp-semantic-label">Prefijo:</span>
+      <input class="exp-prefix-input" type="text" id="exp-prefix" value="color" placeholder="color" oninput="renderExport()">
+      <span class="exp-semantic-label" style="margin-left:4px;">Nombres de rol:</span>
+    </div>
+    <div class="exp-role-names" id="exp-role-names"></div>
+    <div class="exp-tabs">
+      <button class="exp-tab on" onclick="setExpTab('css',this)">CSS Variables</button>
+      <button class="exp-tab" onclick="setExpTab('json',this)">JSON Tokens</button>
+      <button class="exp-tab" onclick="setExpTab('tailwind',this)">Tailwind</button>
+    </div>
+    <div class="exp-box">
+      <button class="exp-copy" onclick="copyExport()" title="Copiar todo">Copiar</button>
+      <pre class="exp-pre" id="exp-pre"></pre>
+    </div>
+    <p class="exp-hint" id="exp-hint"></p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-brand">
+    <span class="footer-name">MCSangel</span>
+    <span class="footer-tag">AI Senior Creative Designer · UI Designer · Illustrator<br>Color System Pro</span>
+  </div>
+  <div class="footer-links">
+    <span class="footer-link">OKLCH · WCAG 2.1 · CVD</span>
+  </div>
+  <p class="footer-copy">© 2026 MCSangel — Herramienta de código abierto. Hecha con amor por el detalle.</p>
+</footer>
+
+</div>
+<div id="global-tip" class="help-tip"></div>
+<div class="toast" id="toast">
+  <span class="toast-check">✓</span>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────── */
+let colors=[], mode='light', gdata=null, roleAssign={}, reasoning={}, stateAssign=[];
+const uid=()=>Math.random().toString(36).slice(2,6);
+
+const ROLES=[
+  {key:'clickable', name:'Clickable',       desc:'Botón primario · links · CTA',        lightStop:500, darkStop:400},
+  {key:'hover',     name:'Hover / activo',  desc:'Estado hover · pressed · focus ring', lightStop:600, darkStop:300},
+  {key:'txt_main',  name:'Texto principal', desc:'Títulos · cuerpo · alto contraste',   lightStop:900, darkStop:50 },
+  {key:'txt_sec',   name:'Texto secundario',desc:'Labels · hints · subtítulos',         lightStop:700, darkStop:200},
+  {key:'bg_page',   name:'Fondo de página', desc:'Base de la interfaz',                 lightStop:50,  darkStop:950},
+  {key:'bg_card',   name:'Fondo de card',   desc:'Superficies · paneles · inputs',      lightStop:50,  darkStop:900},
+  {key:'highlight', name:'Resalto / badge', desc:'Tags · notificaciones · estados',     lightStop:100, darkStop:800},
+  {key:'border',    name:'Borde',           desc:'Separadores · outlines · inputs',     lightStop:200, darkStop:700},
+];
+
+/* State roles — for colors not assigned to primary roles */
+const STATE_ROLES=[
+  {
+    key:'success', name:'Éxito',
+    desc:'Confirmaciones · estados positivos · checks · mensajes de éxito',
+    /* True greens: 95°–170° — excludes yellow-greens and ambers */
+    hueRange:[95,170],
+    minChroma:0.04, /* grays with C<0.04 are never success */
+    lightStop:500, darkStop:400,
+    idealL:[0.3,0.95], idealC:0.05,
+    usageHints:'Usa este color en iconos de check, borders de inputs válidos y mensajes de confirmación. El verde es universalmente reconocido como señal de éxito. Si el color es muy claro, úsalo sobre fondos oscuros o como fill de iconos.'
+  },
+  {
+    key:'error', name:'Error',
+    desc:'Validaciones fallidas · mensajes críticos · estados de peligro',
+    /* Reds: H 10°–35° (orange-reds like #FF383C) + H 345°–360° (cool reds) */
+    hueRange:[10,35],
+    hueRange2:[345,360],
+    minChroma:0.08,
+    lightStop:500, darkStop:400,
+    idealL:[0.35,0.72], idealC:0.1,
+    usageHints:'Úsalo en mensajes de error, borders de inputs inválidos e iconos de alerta crítica. El rojo es la señal universal de peligro o fallo. Nunca como color de fondo de página.'
+  },
+  {
+    key:'warning', name:'Advertencia',
+    desc:'Alertas · estados de precaución · información importante',
+    /* Ambers and oranges: 36°–94° — excludes true greens and true reds */
+    hueRange:[36,94],
+    minChroma:0.06,
+    lightStop:500, darkStop:400,
+    idealL:[0.4,0.88], idealC:0.07,
+    usageHints:'Banners de alerta, estados pendientes, iconos de precaución. El ámbar y naranja son la convención global para advertencias. Verifica siempre el contraste del texto sobre este color.'
+  },
+  {
+    key:'info', name:'Información',
+    desc:'Tooltips · banners informativos · estados neutros',
+    /* Blues: 200°–270° */
+    hueRange:[200,270],
+    minChroma:0.05,
+    lightStop:500, darkStop:400,
+    idealL:[0.35,0.7], idealC:0.06,
+    usageHints:'Mensajes informativos, tooltips de ayuda, badges de estado neutro. Diferéncialo visualmente del color Clickable principal si comparten hue.'
+  },
+  {
+    key:'accent2', name:'Acento secundario',
+    desc:'Purples · violetas · énfasis visual secundario',
+    /* Purples and violets: H 270°–330° */
+    hueRange:[270,330], minChroma:0.05,
+    lightStop:500, darkStop:400,
+    idealL:[0.3,0.85], idealC:0.08,
+    usageHints:'Los morados y violetas funcionan como acento secundario para crear jerarquía visual, separar categorías de contenido o destacar elementos sin competir con la acción primaria.'
+  },
+  {
+    key:'pink', name:'Pink / Magenta',
+    desc:'Fucsias · pinks · magentas · acento vibrante',
+    /* Pinks and magentas: H 330°–360° and H 0°–15° */
+    hueRange:[330,375], minChroma:0.08,
+    lightStop:500, darkStop:400,
+    idealL:[0.3,0.85], idealC:0.1,
+    usageHints:'Fucsias y magentas son colores de alto impacto visual. Úsalos para calls-to-action secundarios, highlights de marketing, iconografía expresiva o elementos de marca que necesiten energía visual.'
+  },
+  {
+    key:'neutral', name:'Neutro / UI',
+    desc:'Superficies neutras · grises · separadores · fondos secundarios',
+    hueRange:null,
+    minChroma:0.0, /* accepts grays with any chroma */
+    lightStop:200, darkStop:700,
+    idealL:[0.5,0.95], idealC:0.0,
+    usageHints:'Perfecto para superficies de cards, separadores, inputs deshabilitados y cualquier elemento que necesite presencia visual sin competir con los colores de acción o estado.'
+  },
+  {
+    key:'decorative', name:'Decorativo / ilustración',
+    desc:'Gráficos · ilustraciones · fondos decorativos · no texto',
+    hueRange:null,
+    minChroma:0.0,
+    lightStop:500, darkStop:400,
+    idealL:null, idealC:0.0,
+    usageHints:'Este color es perfecto para ilustraciones, gráficos, fondos decorativos y elementos puramente visuales. No lo uses para texto o elementos interactivos.'
+  },
+];
+
+/* ─────────────────────────────────────────────
+   COLOR MATH — OKLCH
+───────────────────────────────────────────── */
+function lin(v){v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4);}
+function unlin(v){return v<=.0031308?v*12.92:1.055*Math.pow(v,1/2.4)-.055;}
+function h2r(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function r2h(r,g,b){return'#'+[r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('');}
+
+function rgb2oklch(r,g,b){
+  const rl=lin(r),gl=lin(g),bl=lin(b);
+  const l=.4122214708*rl+.5363325363*gl+.0514459929*bl;
+  const m=.2119034982*rl+.6806995451*gl+.1073969566*bl;
+  const s=.0883024619*rl+.2817188376*gl+.6299787005*bl;
+  const l_=Math.cbrt(l),m_=Math.cbrt(m),s_=Math.cbrt(s);
+  const L=.2104542553*l_+.7936177850*m_-.0040720468*s_;
+  const a=1.9779984951*l_-2.4285922050*m_+.4505937099*s_;
+  const bv=.0259040371*l_+.7827717662*m_-.8086757660*s_;
+  return[L,Math.sqrt(a*a+bv*bv),(((Math.atan2(bv,a)*180/Math.PI)%360)+360)%360];
+}
+function oklch2rgb(L,C,H){
+  const h=H*Math.PI/180,a=C*Math.cos(h),b=C*Math.sin(h);
+  const l_=L+.3963377774*a+.2158037573*b;
+  const m_=L-.1055613458*a-.0638541728*b;
+  const s_=L-.0894841775*a-1.2914855480*b;
+  const lc=l_*l_*l_,mc=m_*m_*m_,sc=s_*s_*s_;
+  const rl=4.0767416621*lc-3.3077115913*mc+.2309699292*sc;
+  const gl=-1.2684380046*lc+2.6097574011*mc-.3413193965*sc;
+  const bl=-.0041960863*lc-.7034186147*mc+1.7076147010*sc;
+  return[
+    Math.round(Math.max(0,Math.min(1,unlin(rl)))*255),
+    Math.round(Math.max(0,Math.min(1,unlin(gl)))*255),
+    Math.round(Math.max(0,Math.min(1,unlin(bl)))*255)
+  ];
+}
+function makeScale(hex){
+  const[r,g,b]=h2r(hex);
+  const[L,C,H]=rgb2oklch(r,g,b);
+  const stops=[50,100,200,300,400,500,600,700,800,900,950];
+  return stops.reduce((acc,stop)=>{
+    if(stop===500){acc[stop]=hex.toLowerCase();return acc;}
+    const Lv=stop<500?L+(0.985-L)*(500-stop)/500:L+(0.10-L)*(stop-500)/450;
+    const t=Math.abs(stop-500)/500;
+    const[nr,ng,nb]=oklch2rgb(Lv,Math.min(C*(1-t*0.72),0.38),H);
+    acc[stop]=r2h(nr,ng,nb);
+    return acc;
+  },{});
+}
+
+/* ─────────────────────────────────────────────
+   WCAG
+───────────────────────────────────────────── */
+function lum(hex){
+  return h2r(hex).reduce((acc,v,i)=>{
+    v/=255;v=v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);
+    return acc+v*[.2126,.7152,.0722][i];
+  },0);
+}
+function cr(a,b){const l1=lum(a),l2=lum(b);return(Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);}
+function wcagLabel(r){
+  if(r>=7)  return['AAA','pass'];
+  if(r>=4.5)return['AA','pass'];
+  if(r>=3)  return['AA*','warn'];
+  return['Falla','fail'];
+}
+
+/* ─────────────────────────────────────────────
+   CVD
+───────────────────────────────────────────── */
+function cvdD(h){const[r,g,b]=h2r(h);return r2h(.625*r+.375*g,.7*g+.3*r,.3*g+.7*b);}
+function cvdP(h){const[r,g,b]=h2r(h);return r2h(.567*r+.433*g,.558*r+.442*g,.242*g+.758*b);}
+function cvdT(h){const[r,g,b]=h2r(h);return r2h(.95*r+.05*g,.433*g+.567*b,.475*g+.525*b);}
+
+/* ─────────────────────────────────────────────
+   INTELLIGENT AUTO-ASSIGNMENT WITH REASONING
+───────────────────────────────────────────── */
+function scoreAndAssign(data){
+  /* Build profile for each color */
+  const profiles=data.map((c,i)=>{
+    const[r,g,b]=h2r(c.hex);
+    const[L,C,H]=rgb2oklch(r,g,b);
+    const crOnWhite=cr(c.hex,'#ffffff');
+    const crOnBlack=cr(c.hex,'#000000');
+    /* CVD contrast preservation: compare contrast of simulated vs original on white */
+    const cvdDH=cvdD(c.hex);
+    const cvdPH=cvdP(c.hex);
+    const cvdPreserved=Math.min(cr(cvdDH,'#ffffff')/crOnWhite, cr(cvdPH,'#ffffff')/crOnWhite);
+    return{i,name:c.name,hex:c.hex,L,C,H,crOnWhite,crOnBlack,cvdPreserved};
+  });
+
+  const assign={};
+  const reasons={};
+
+  /* ── CLICKABLE ──
+     Strategy: evaluate BEST possible text color (black or white).
+     Never reject — always assign, but add advisory notes when restricted.
+     Score: chroma + best achievable contrast + CVD + lightness range bonus */
+  {
+    const key='clickable';
+    const scored=profiles.map(p=>{
+      /* Best text color on this button */
+      const crBlk=p.crOnBlack; /* black text on button */
+      const crWht=p.crOnWhite; /* white text on button */
+      const bestCr=Math.max(crBlk,crWht);
+      const bestTxt=crBlk>=crWht?'#000000':'#ffffff';
+      const[bestLvl]=wcagLabel(bestCr);
+
+      const advisories=[];
+      let score=0;
+
+      /* Saturation — low chroma looks weak as a button */
+      if(p.C<0.04) advisories.push(`saturación muy baja (C=${p.C.toFixed(3)}) — considera usarlo como acento secundario y reservar un color más saturado para acciones primarias`);
+      else score+=p.C*4;
+
+      /* Text color advisory */
+      if(bestTxt==='#000000') advisories.push(`usa texto negro sobre este botón — contraste ${crBlk.toFixed(1)}:1 ${bestLvl}`);
+      else if(crWht<4.5&&crBlk<4.5) advisories.push(`ningún texto (blanco ni negro) pasa AA sobre este color — considera ajustar la luminosidad o usarlo solo para elementos decorativos`);
+
+      /* Lightness advisory */
+      if(p.L>0.85) advisories.push(`color muy claro — añade un borde o sombra sutil para que el botón sea distinguible sobre fondos blancos`);
+      if(p.L<0.15) advisories.push(`color muy oscuro — funciona bien con texto blanco pero puede confundirse con elementos de texto`);
+
+      /* Score based on best achievable contrast */
+      score+=Math.min(bestCr/10,2);
+      score+=p.cvdPreserved*2;
+      score+=(1-Math.abs(p.L-0.5))*1.5;
+
+      return{...p,score,advisories,bestCr,bestTxt,bestLvl};
+    });
+
+    /* Sort by score — no hard rejections, every color can be clickable */
+    scored.sort((a,b)=>b.score-a.score);
+    const winner=scored[0];
+    const others=scored.slice(1);
+
+    assign[key]=winner.i;
+
+    /* Build advisory message */
+    const hasAdvisory=winner.advisories.length>0;
+    const winnerReason=`Saturación C=${winner.C.toFixed(3)} · mejor contraste de texto ${winner.bestCr.toFixed(1)}:1 con texto ${winner.bestTxt==='#000000'?'negro':'blanco'} · ${winner.bestLvl}`;
+    const advisoryMsg=hasAdvisory
+      ? `⚠ PERO: ${winner.advisories.join(' · ')}`
+      : null;
+
+    reasons[key]={
+      winner,
+      winnerReason,
+      advisoryMsg,
+      rejected: others.filter(p=>p.advisories.length>0).map(p=>({
+        ...p,
+        issues: p.advisories
+      }))
+    };
+  }
+
+  /* ── HOVER ── Same hue as clickable, darker stop (handled at render). No separate color needed. */
+  assign.hover=assign.clickable;
+  reasons.hover={auto:true, msg:'Mismo color que Clickable en paso más oscuro (600 en claro, 300 en oscuro).'};
+
+  /* ── TEXT MAIN ──
+     Must: cr on white ≥ 7 (AAA) or darkest available. Prefer lowest L. */
+  {
+    const key='txt_main';
+    const scored=profiles.map(p=>{
+      const issues=[];
+      if(p.crOnWhite<4.5) issues.push(`contraste insuficiente (${p.crOnWhite.toFixed(1)}:1)`);
+      if(p.C>0.15)        issues.push(`demasiado saturado (C=${p.C.toFixed(3)}) — el texto de cuerpo debe ser casi neutro`);
+      const score=p.crOnWhite+(1-p.L)*3+(1-p.C)*2;
+      return{...p,score,issues};
+    });
+    const valid=scored.filter(p=>!p.issues.length).sort((a,b)=>b.score-a.score);
+    const rejected=scored.filter(p=>p.issues.length);
+    const winner=valid.length?valid[0]:profiles.sort((a,b)=>b.crOnWhite-a.crOnWhite)[0];
+    assign[key]=winner.i;
+    reasons[key]={
+      winner,
+      winnerReason:`Contraste ${winner.crOnWhite.toFixed(1)}:1 · L=${winner.L.toFixed(2)} · C=${winner.C.toFixed(3)} — adecuado para lectura prolongada`,
+      rejected
+    };
+  }
+
+  /* ── TEXT SECONDARY ── Slightly lighter than main, still readable */
+  {
+    const key='txt_sec';
+    const mainIdx=assign.txt_main;
+    const scored=profiles.map(p=>{
+      const issues=[];
+      if(p.crOnWhite<4.5) issues.push(`contraste insuficiente (${p.crOnWhite.toFixed(1)}:1 — mínimo AA 4.5:1)`);
+      if(p.i===mainIdx)   issues.push('mismo color que Texto principal — no crea jerarquía visual');
+      const score=p.crOnWhite+(1-Math.abs(p.L-0.45))*2;
+      return{...p,score,issues};
+    });
+    const valid=scored.filter(p=>!p.issues.length).sort((a,b)=>b.score-a.score);
+    const rejected=scored.filter(p=>p.issues.length);
+    /* If no valid different color, use same as main */
+    const winner=valid.length?valid[0]:profiles[mainIdx];
+    assign[key]=winner.i;
+    reasons[key]={
+      winner,
+      winnerReason:`Contraste ${winner.crOnWhite.toFixed(1)}:1 · diferenciado del texto principal — crea jerarquía visual`,
+      rejected
+    };
+  }
+
+  /* ── BG PAGE ── Lightest color, preferably low chroma */
+  {
+    const key='bg_page';
+    const scored=profiles.map(p=>{
+      const issues=[];
+      if(p.L<0.85) issues.push(`demasiado oscuro para fondo de página (L=${p.L.toFixed(2)})`);
+      if(p.C>0.08) issues.push(`demasiado saturado para fondo (C=${p.C.toFixed(3)}) — cansa la vista`);
+      const score=p.L*3+(1-p.C)*2;
+      return{...p,score,issues};
+    });
+    const valid=scored.filter(p=>!p.issues.length).sort((a,b)=>b.score-a.score);
+    const rejected=scored.filter(p=>p.issues.length);
+    /* Fallback: pick lightest with C<=0.15 — never pick a saturated color as bg */
+    const fallback=profiles.filter(p=>p.C<=0.15).sort((a,b)=>b.L-a.L)[0]||profiles.sort((a,b)=>b.L-a.L)[0];
+    const winner=valid.length?valid[0]:fallback;
+    assign[key]=winner.i;
+    reasons[key]={
+      winner,
+      winnerReason:`L=${winner.L.toFixed(2)} — luminosidad alta · C=${winner.C.toFixed(3)} — saturación baja, no fatiga la vista`,
+      rejected
+    };
+  }
+
+  /* ── BG CARD ── Slightly different from bg_page, same lightness range */
+  {
+    const key='bg_card';
+    const pageIdx=assign.bg_page;
+    const scored=profiles.map(p=>{
+      const issues=[];
+      if(p.L<0.82) issues.push(`demasiado oscuro para superficie (L=${p.L.toFixed(2)})`);
+      if(p.C>0.10) issues.push(`demasiado saturado para superficie (C=${p.C.toFixed(3)})`);
+      if(p.i===pageIdx) issues.push('mismo color que Fondo de página — no crea separación visual');
+      const score=p.L*2+(1-p.C)*1.5;
+      return{...p,score,issues};
+    });
+    const valid=scored.filter(p=>!p.issues.length).sort((a,b)=>b.score-a.score);
+    const rejected=scored.filter(p=>p.issues.length);
+    /* Fallback: never pick highly saturated colors as card bg */
+    const fallback=profiles.filter(p=>p.C<=0.15&&p.i!==pageIdx).sort((a,b)=>b.L-a.L)[0]||profiles[pageIdx];
+    const winner=valid.length?valid[0]:fallback;
+    assign[key]=winner.i;
+    reasons[key]={
+      winner,
+      winnerReason: winner.i===pageIdx
+        ? 'Solo hay un color claro disponible. Considera agregar un gris claro para diferenciar cards.'
+        : `L=${winner.L.toFixed(2)} · diferenciado del fondo de página — crea separación de superficies`,
+      rejected
+    };
+  }
+
+  /* ── HIGHLIGHT / BADGE ── Saturated but lighter than clickable */
+  {
+    const key='highlight';
+    const clickIdx=assign.clickable;
+    const scored=profiles.map(p=>{
+      const issues=[];
+      if(p.C<0.04) issues.push(`sin saturación suficiente para resaltar (C=${p.C.toFixed(3)})`);
+      if(p.L<0.7)  issues.push(`demasiado oscuro para badge (L=${p.L.toFixed(2)}) — usar stop más claro del mismo color`);
+      const score=p.C*2+(p.i===clickIdx?1.5:0)+(p.L)*1;
+      return{...p,score,issues};
+    });
+    const valid=scored.filter(p=>!p.issues.length).sort((a,b)=>b.score-a.score);
+    const rejected=scored.filter(p=>p.issues.length);
+    /* Prefer clickable color for consistency */
+    const winner=valid.find(p=>p.i===clickIdx)||valid[0]||profiles[clickIdx];
+    assign[key]=winner.i;
+    reasons[key]={
+      winner,
+      winnerReason:`Mismo hue que Clickable en paso 100 — mantiene coherencia cromática del sistema`,
+      rejected
+    };
+  }
+
+  /* ── BORDER ── Medium lightness, low-ish chroma */
+  {
+    const key='border';
+    const scored=profiles.map(p=>{
+      const issues=[];
+      if(p.L>0.85) issues.push(`demasiado claro para ser visible como borde (L=${p.L.toFixed(2)})`);
+      if(p.L<0.3)  issues.push(`demasiado oscuro para borde sutil (L=${p.L.toFixed(2)})`);
+      const score=(1-Math.abs(p.L-0.55))*3+(1-p.C)*2;
+      return{...p,score,issues};
+    });
+    const valid=scored.filter(p=>!p.issues.length).sort((a,b)=>b.score-a.score);
+    const rejected=scored.filter(p=>p.issues.length);
+    const fallback=profiles.sort((a,b)=>Math.abs(a.L-0.55)-Math.abs(b.L-0.55))[0];
+    const winner=valid.length?valid[0]:fallback;
+    assign[key]=winner.i;
+    reasons[key]={
+      winner,
+      winnerReason:`L=${winner.L.toFixed(2)} — luminosidad media, visible pero no dominante · paso 200 en claro`,
+      rejected
+    };
+  }
+
+  return{assign,reasons};
+}
+
+/* ─────────────────────────────────────────────
+   STATE ROLE ASSIGNMENT — for unassigned colors
+───────────────────────────────────────────── */
+function assignStateRoles(data, primaryAssign){
+  /* Find indices already used in primary roles */
+  const usedIdx=new Set(Object.values(primaryAssign));
+  /* Colors not assigned to any primary role */
+  const unassigned=data.map((_,i)=>i).filter(i=>!usedIdx.has(i));
+  if(!unassigned.length)return[];
+
+  const results=[];
+  const assignedStateIdx=new Set();
+
+  /* For each unassigned color, find the best STATE_ROLE match */
+  for(const idx of unassigned){
+    const c=data[idx];
+    const[r,g,b]=h2r(c.hex);
+    const[L,C,H]=rgb2oklch(r,g,b);
+    const contrastOnWhite=cr(c.hex,'#ffffff');
+
+    /* Score against each state role */
+    let bestRole=null, bestScore=-Infinity;
+    for(const sr of STATE_ROLES){
+      if(assignedStateIdx.has(sr.key))continue;
+
+      let score=0;
+
+      /* Chroma gate — colors below minChroma get heavy penalty for semantic roles */
+      if(sr.minChroma>0&&C<sr.minChroma) score-=30;
+
+      /* Hue match — strict */
+      if(sr.hueRange){
+        const[hMin,hMax]=sr.hueRange;
+        const hNorm=((H%360)+360)%360;
+        const inRange1=hMax>360?(hNorm>=hMin||hNorm<=(hMax-360)):hNorm>=hMin&&hNorm<=hMax;
+        /* Support optional second hue range (e.g. error covers two zones) */
+        let inRange2=false;
+        if(sr.hueRange2){
+          const[h2Min,h2Max]=sr.hueRange2;
+          inRange2=h2Max>360?(hNorm>=h2Min||hNorm<=(h2Max-360)):hNorm>=h2Min&&hNorm<=h2Max;
+        }
+        if(inRange1||inRange2) score+=20;
+        else score-=15;
+      } else {
+        score+=2;
+      }
+
+      /* Lightness match */
+      if(sr.idealL){
+        const[lMin,lMax]=sr.idealL;
+        if(L>=lMin&&L<=lMax) score+=5;
+        else score+=Math.max(0,3-Math.abs(L-(lMin+lMax)/2)*8);
+      }
+
+      /* Chroma bonus */
+      if(sr.idealC>0&&C>=sr.idealC) score+=3;
+
+      /* Neutral role strongly prefers grays (C<0.03), rejects saturated colors */
+      if(sr.key==='neutral'){
+        if(C<0.03) score+=10;
+        else if(C<0.06) score-=5;
+        else score-=25; /* saturated colors should never be neutral */
+      }
+
+      /* Last resort roles */
+      if(sr.key==='decorative') score=Math.min(score,-15);
+      if(sr.key==='accent2') score=Math.min(score,-3);
+
+      if(score>bestScore){bestScore=score;bestRole=sr;}
+    }
+
+    if(bestRole){
+      assignedStateIdx.add(bestRole.key);
+      results.push({
+        colorIdx:idx,
+        color:c,
+        role:bestRole,
+        L,C,H,
+        contrastOnWhite,
+        hex:c.hex
+      });
+    }
+  }
+  return results;
+}
+
+/* ─────────────────────────────────────────────
+   RESOLVE: get actual hex for a role
+───────────────────────────────────────────── */
+function roleHex(key){
+  const role=ROLES.find(r=>r.key===key);
+  const idx=roleAssign[key]??0;
+  const c=gdata[Math.min(idx,gdata.length-1)];
+  const stop=mode==='light'?role.lightStop:role.darkStop;
+  return c.scale[stop];
+}
+
+/* ─────────────────────────────────────────────
+   UI — COLOR INPUTS
+───────────────────────────────────────────── */
+function addColor(hex,name){
+  colors.push({id:uid(),hex:(hex||'#4F7FFF').toLowerCase(),name:name||'Color '+(colors.length+1)});
+  renderInputs();
+}
+function removeColor(id){colors=colors.filter(c=>c.id!==id);renderInputs();}
+function renderInputs(){
+  document.getElementById('ci').innerHTML=colors.map(c=>`
+    <div class="irow" id="r${c.id}">
+      <div class="cprev" id="p${c.id}" style="background:${c.hex}"></div>
+      <input class="hinput" type="text" value="${c.hex}" maxlength="7"
+        oninput="updHex('${c.id}',this.value)" placeholder="#000000">
+      <input class="ninput" type="text" value="${c.name}"
+        oninput="updName('${c.id}',this.value)" placeholder="Nombre">
+      ${colors.length>1?`<button class="rmbtn" onclick="removeColor('${c.id}')">×</button>`:''}
+    </div>`).join('');
+}
+function updName(id,v){const c=colors.find(x=>x.id===id);if(c)c.name=v;}
+
+/* ─────────────────────────────────────────────
+   GENERATE
+───────────────────────────────────────────── */
+function showGenError(msg){
+  const el=document.getElementById('genbtn-error');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),4000);
+}
+function generate(){
+  const valid=colors.filter(c=>/^#[0-9a-f]{6}$/.test(c.hex));
+  if(!valid.length){
+    showGenError('Agrega al menos un color hex válido con formato #rrggbb — por ejemplo #4F7FFF');
+    /* Shake all invalid inputs */
+    colors.forEach(c=>{
+      if(!/^#[0-9a-f]{6}$/.test(c.hex)){
+        const inp=document.querySelector(`#r${c.id} .hinput`);
+        if(inp){inp.classList.add('invalid');setTimeout(()=>inp.classList.remove('invalid'),600);}
+      }
+    });
+    return;
+  }
+  document.getElementById('genbtn-error').classList.remove('show');
+  gdata=valid.map(c=>({...c,scale:makeScale(c.hex)}));
+  const result=scoreAndAssign(gdata);
+  roleAssign=result.assign;
+  reasoning=result.reasons;
+  stateAssign=assignStateRoles(gdata,roleAssign);
+  renderAll();
+  document.getElementById('results').style.display='block';
+  setTimeout(()=>document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'}),60);
+}
+
+/* ─────────────────────────────────────────────
+   SUMMARY
+───────────────────────────────────────────── */
+function renderSum(){
+  const bgP=roleHex('bg_page');
+  const checks=['clickable','txt_main','txt_sec','highlight'];
+  let passing=0,aaa=0;
+  checks.forEach(k=>{
+    const r=cr(roleHex(k),bgP);
+    if(r>=4.5)passing++;
+    if(r>=7)aaa++;
+  });
+
+  const swatches=gdata.map((c,i)=>`
+    <div class="swatch-item" onclick="copyH('${c.hex}')" title="Copiar ${c.hex}">
+      <div class="swatch-box" style="background:${c.hex}"></div>
+      <div class="swatch-lbl">${c.name}<br>${c.hex}</div>
+    </div>`).join('');
+
+  document.getElementById('sum').innerHTML=`
+    <p class="stitle">Paleta analizada</p>
+    <div class="swatch-row">${swatches}</div>
+    <div class="sumgrid">
+      <div class="scard"><div class="sval" style="color:${passing===checks.length?'#27500A':'#A32D2D'}">${passing}/${checks.length}</div><div class="slbl">roles pasan AA</div></div>
+      <div class="scard"><div class="sval">${aaa}</div><div class="slbl">roles AAA</div></div>
+      <div class="scard"><div class="sval" style="font-size:13px;padding-top:3px;">OKLCH</div><div class="slbl">escala perceptual</div></div>
+      <div class="scard"><div class="sval" style="font-size:13px;padding-top:3px;">CVD</div><div class="slbl">sim. daltonismo</div></div>
+    </div>`;
+}
+
+/* ─────────────────────────────────────────────
+   ROLE GRID
+───────────────────────────────────────────── */
+function renderRoleGrid(){
+  const bgP=roleHex('bg_page');
+  document.getElementById('role-grid').innerHTML=ROLES.map(role=>{
+    const idx=roleAssign[role.key]??0;
+    const hex=roleHex(role.key);
+    const stop=mode==='light'?role.lightStop:role.darkStop;
+    const r=cr(hex,bgP);
+    const[lvl,cls]=wcagLabel(r);
+    const showCr=['clickable','txt_main','txt_sec','highlight'].includes(role.key);
+    const rs=reasoning[role.key];
+    const isAuto=rs&&rs.auto;
+
+    /* Build options */
+    const opts=gdata.map((c,i)=>`<option value="${i}"${i===idx?' selected':''}>${c.name} — ${c.hex}</option>`).join('');
+
+    /* Build reasoning HTML */
+    let reasonHtml='';
+    if(isAuto){
+      reasonHtml=`<div class="reasoning"><p class="reasoning-winner">${rs.msg}</p></div>`;
+    } else if(rs){
+      const advisoryHtml=rs.advisoryMsg?`
+        <div style="margin-top:7px;padding:8px 10px;background:#FEF3C0;border-radius:6px;border-left:3px solid #F59E0B;">
+          <p style="font-size:10px;font-family:'DM Mono',monospace;color:#854F0B;line-height:1.55;">${rs.advisoryMsg}</p>
+        </div>`:'';
+      const rejectedHtml=rs.rejected&&rs.rejected.length?`
+        <div class="reasoning-rejected">
+          <div class="reasoning-rejected-title">Otros colores evaluados</div>
+          ${rs.rejected.map(p=>`
+            <div class="rejected-item">
+              <div class="rejected-dot" style="background:${p.hex}"></div>
+              <span><strong>${p.name}</strong> — ${p.issues[0]}</span>
+            </div>`).join('')}
+        </div>`:'';
+      reasonHtml=`
+        <div class="reasoning">
+          <p class="reasoning-winner">✓ <strong>${rs.winner.name}</strong> — ${rs.winnerReason}</p>
+          ${advisoryHtml}
+          ${rejectedHtml}
+        </div>`;
+    }
+
+    return`<div class="rcard" id="rr-${role.key}">
+      <div class="rcard-color-strip" style="background:${hex}"></div>
+      <div class="rcard-body">
+        <div class="rcard-title">
+          <div class="rcard-dot" style="background:${hex}"></div>
+          ${role.name}
+          ${showCr?`<span class="badge ${cls}" style="margin-left:auto;">${lvl} ${r.toFixed(1)}:1</span>`:''}
+        </div>
+        <div class="rcard-desc">${role.desc}</div>
+        <select class="rcard-select" onchange="changeRole('${role.key}',this.value)">${opts}</select>
+        <div class="rcard-meta">paso ${stop} → ${hex}</div>
+        ${reasonHtml}
+        <div style="margin-top:10px;">
+          <p style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink2);font-weight:500;margin-bottom:8px;">Cómo ve este color una persona con…</p>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:36px;height:36px;border-radius:8px;flex-shrink:0;background:${hex};border:0.5px solid rgba(0,0,0,.08);"></div>
+              <div style="display:flex;flex-direction:column;gap:1px;">
+                <span style="font-size:11px;font-weight:700;color:var(--ink);">Original</span>
+                <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);">${hex}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:36px;height:36px;border-radius:8px;flex-shrink:0;background:${cvdD(hex)};border:0.5px solid rgba(0,0,0,.08);"></div>
+              <div style="display:flex;flex-direction:column;gap:1px;">
+                <span style="font-size:11px;font-weight:700;color:var(--ink);">Deuteranopia</span>
+                <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);">Rojo-verde · ~8% hombres · ${cvdD(hex)}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:36px;height:36px;border-radius:8px;flex-shrink:0;background:${cvdP(hex)};border:0.5px solid rgba(0,0,0,.08);"></div>
+              <div style="display:flex;flex-direction:column;gap:1px;">
+                <span style="font-size:11px;font-weight:700;color:var(--ink);">Protanopia</span>
+                <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);">Sin receptor rojo · ~1% hombres · ${cvdP(hex)}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:36px;height:36px;border-radius:8px;flex-shrink:0;background:${cvdT(hex)};border:0.5px solid rgba(0,0,0,.08);"></div>
+              <div style="display:flex;flex-direction:column;gap:1px;">
+                <span style="font-size:11px;font-weight:700;color:var(--ink);">Tritanopia</span>
+                <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);">Azul-amarillo · ~0.01% · ${cvdT(hex)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─────────────────────────────────────────────
+   SCALES
+───────────────────────────────────────────── */
+function renderScales(){
+  const stops=[50,100,200,300,400,500,600,700,800,900,950];
+  document.getElementById('scales').innerHTML=`
+    <p class="stitle">Escalas OKLCH</p>
+    ${gdata.map(c=>`
+      <div style="margin-bottom:1.1rem;">
+        <p style="font-size:12px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+          ${c.name}
+          <span style="font-weight:400;font-family:'DM Mono',monospace;font-size:11px;color:#bbb;">${c.hex}</span>
+        </p>
+        <div class="scl-wrap">
+          ${stops.map(s=>`
+            <div class="scl-cell">
+              <div class="scl-sw${s===500?' pin':''}" style="background:${c.scale[s]};"
+                title="Clic para copiar ${c.scale[s]} (${s})" onclick="copyH('${c.scale[s]}')"></div>
+              <span class="scl-num">${s}</span>
+            </div>`).join('')}
+        </div>
+      </div>`).join('')}
+    <p style="font-size:10px;font-family:'DM Mono',monospace;color:#ccc;">El paso 500 es tu hex exacto de marca · haz clic en cualquier swatch para copiar</p>`;
+}
+
+/* ─────────────────────────────────────────────
+   PREVIEW
+───────────────────────────────────────────── */
+function renderPreview(){
+  const click =roleHex('clickable');
+  const hover =roleHex('hover');
+  const tMain =roleHex('txt_main');
+  const tSec  =roleHex('txt_sec');
+  const bgPage=roleHex('bg_page');
+  const bgCard=roleHex('bg_card');
+  const hl    =roleHex('highlight');
+  const bdr   =roleHex('border');
+
+  /* Use exact same logic as reasoning — best of black or white */
+  const crBlkClick=cr(click,'#000000');
+  const crWhtClick=cr(click,'#ffffff');
+  const btnTxt=crBlkClick>=crWhtClick?'#000000':'#ffffff';
+
+  const crBlkHov=cr(hover,'#000000');
+  const crWhtHov=cr(hover,'#ffffff');
+  const hvTxt=crBlkHov>=crWhtHov?'#000000':'#ffffff';
+
+  const rBtn =cr(btnTxt,click);
+  const rMain=cr(tMain,bgPage);
+  const rSec =cr(tSec,bgPage);
+  const rHL  =cr(tSec,hl);
+  const rBdr =cr(bdr,bgPage);
+  const[lBtn, cBtn] =wcagLabel(rBtn);
+  const[lMain,cMain]=wcagLabel(rMain);
+  const[lSec, cSec] =wcagLabel(rSec);
+  const[lHL,  cHL]  =wcagLabel(rHL);
+
+  document.getElementById('preview').innerHTML=`
+    <div class="pv-box" style="background:${bgPage};border:0.5px solid ${bdr};">
+      <div class="pv-nav" style="border-bottom:0.5px solid ${bdr};">
+        <div style="width:30px;height:30px;border-radius:8px;background:${click};flex-shrink:0;"></div>
+        <span style="font-size:14px;font-weight:700;color:${tMain};font-family:'Syne',sans-serif;">Mi App</span>
+        <span style="margin-left:auto;font-size:11px;color:${tSec};font-family:'DM Mono',monospace;">inicio · about · contacto</span>
+      </div>
+
+      <div style="margin:14px 0 10px;">
+        <p style="font-size:20px;font-weight:800;color:${tMain};margin-bottom:5px;font-family:'Syne',sans-serif;letter-spacing:-.02em;">Título de sección</p>
+        <p style="font-size:13px;color:${tSec};line-height:1.65;margin-bottom:12px;font-family:'Syne',sans-serif;">Cuerpo de texto validado contra el fondo real de esta interfaz, no contra blanco genérico.</p>
+      </div>
+
+      <div class="pv-cards">
+        <div class="pv-card" style="background:${bgCard};border:0.5px solid ${bdr};">
+          <p style="font-size:14px;font-weight:700;color:${tMain};font-family:'Syne',sans-serif;margin-bottom:4px;">Card titulo</p>
+          <p style="font-size:12px;color:${tSec};line-height:1.6;margin-bottom:10px;font-family:'Syne',sans-serif;">Texto de apoyo en superficie de card.</p>
+          <span class="pv-badge" style="background:${hl};color:${tSec};">badge</span>
+        </div>
+        <div class="pv-card" style="background:${bgCard};border:0.5px solid ${bdr};">
+          <p style="font-size:14px;font-weight:700;color:${tMain};font-family:'Syne',sans-serif;margin-bottom:4px;">Card titulo</p>
+          <p style="font-size:12px;color:${tSec};line-height:1.6;margin-bottom:10px;font-family:'Syne',sans-serif;">Cada card usa fondo de superficie, no de página.</p>
+          <span class="pv-badge" style="background:${hl};color:${tSec};">estado</span>
+        </div>
+      </div>
+
+      <div class="pv-btns">
+        <button class="pv-btn" style="background:${click};color:${btnTxt};">Acción primaria</button>
+        <button class="pv-btn" style="background:${hover};color:${hvTxt};opacity:.88;">Hover / activo</button>
+        <button class="pv-btn-ghost" style="color:${tMain};border:0.5px solid ${bdr};">Secundario</button>
+      </div>
+
+      <div class="contrast-panel" style="background:${bgCard};border:0.5px solid ${bdr};">
+        <p style="font-size:10px;font-family:'DM Mono',monospace;color:${tSec};opacity:.65;margin-bottom:8px;">Contrastes validados — pares reales de la interfaz</p>
+        <div class="cr-grid">
+          <div class="cr-row">
+            <div class="cr-pair">Txt. principal / fondo página</div>
+            <div class="cr-val"><span class="badge ${cMain}">${lMain} ${rMain.toFixed(1)}:1</span></div>
+          </div>
+          <div class="cr-row">
+            <div class="cr-pair">Txt. secundario / fondo página</div>
+            <div class="cr-val"><span class="badge ${cSec}">${lSec} ${rSec.toFixed(1)}:1</span></div>
+          </div>
+          <div class="cr-row">
+            <div class="cr-pair">Texto botón / fondo botón</div>
+            <div class="cr-val"><span class="badge ${cBtn}">${lBtn} ${rBtn.toFixed(1)}:1</span></div>
+          </div>
+          <div class="cr-row">
+            <div class="cr-pair">Txt. secundario / badge</div>
+            <div class="cr-val"><span class="badge ${cHL}">${lHL} ${rHL.toFixed(1)}:1</span></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ─────────────────────────────────────────────
+   UTILS
+───────────────────────────────────────────── */
+function setMode(m,btn){
+  mode=m;
+  document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(gdata)renderAll();
+}
+function copyH(hex){
+  navigator.clipboard.writeText(hex).catch(()=>{});
+  showToast(hex+' copiado al portapapeles');
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.innerHTML=`<span class="toast-check">✓</span>${msg}`;
+  t.classList.add('show');
+  clearTimeout(t._tid);t._tid=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+/* ─────────────────────────────────────────────
+   IMAGE EXTRACTION
+───────────────────────────────────────────── */
+function extractImg(e){
+  const file=e.target.files[0];if(!file)return;
+  /* Show loading state */
+  const dz=document.getElementById('dz');
+  dz.classList.add('loading');
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      /* Resize to max 300px — balance between accuracy and speed */
+      const cv=document.getElementById('ic');
+      const sc=Math.min(1,300/Math.max(img.width,img.height));
+      cv.width=Math.round(img.width*sc);
+      cv.height=Math.round(img.height*sc);
+      const ctx=cv.getContext('2d');
+      ctx.drawImage(img,0,0,cv.width,cv.height);
+      const d=ctx.getImageData(0,0,cv.width,cv.height).data;
+
+      /* Step 1: Read every pixel (no skipping), convert to OKLCH, filter neutrals.
+         Use adaptive chroma threshold: darks need less chroma to be intentional. */
+      const pixels=[];
+      for(let i=0;i<d.length;i+=4){
+        if(d[i+3]<230)continue; /* skip transparent/semi-transparent */
+        const r=d[i],g=d[i+1],b=d[i+2];
+        const[L,C,H]=rgb2oklch(r,g,b);
+        if(L>0.97||L<0.04)continue; /* skip pure white / pure black */
+        /* Adaptive chroma threshold by lightness zone */
+        const minC=L<0.25?0.015:L>0.88?0.035:0.05;
+        if(C<minC)continue;
+        pixels.push({r,g,b,L,C,H});
+      }
+
+      if(!pixels.length){
+        dz.classList.remove('loading');
+        /* Dead end fix: lower thresholds and retry before giving up */
+        const fallback=[];
+        for(let i=0;i<d.length;i+=4){
+          if(d[i+3]<200)continue;
+          const r=d[i],g=d[i+1],b=d[i+2];
+          const[L,C,H]=rgb2oklch(r,g,b);
+          if(L>0.98||L<0.02)continue;
+          if(C<0.008)continue; /* very permissive fallback */
+          fallback.push({r,g,b,L,C,H});
+        }
+        if(fallback.length){
+          /* Use fallback pixels but show a warning */
+          const fgroups=[];
+          for(const px of fallback){
+            const fg=fgroups.find(g=>Math.min(Math.abs(g.rep.H-px.H),360-Math.abs(g.rep.H-px.H))<25);
+            if(fg){fg.count++;if(px.C>fg.rep.C)fg.rep=px;}
+            else fgroups.push({rep:px,count:1});
+          }
+          const fselected=fgroups.sort((a,b)=>b.count-a.count).slice(0,4)
+            .map(g=>({hex:r2h(g.rep.r,g.rep.g,g.rep.b),count:g.count}));
+          const chips=document.getElementById('ext-chips');
+          chips.style.display='flex';
+          chips.innerHTML=
+            '<p style="font-size:10px;font-family:DM Mono,monospace;color:#854F0B;background:#FEF3C0;border-radius:6px;padding:6px 10px;width:100%;margin-bottom:8px;line-height:1.5;">La imagen tiene colores poco saturados. Se extrajeron los más distinguibles — revisa y ajusta los hex si es necesario.</p>'+
+            fselected.map(s=>`<div class="ext-chip" onclick="copyH('${s.hex}')" title="Clic para copiar"><div class="ext-dot" style="background:${s.hex}"></div>${s.hex}</div>`).join('');
+          colors=[];
+          const names=['Principal','Secundario','Acento','Neutro'];
+          fselected.forEach((s,i)=>addColor(s.hex,names[i]));
+        } else {
+          /* True dead end — give clear instructions */
+          const chips=document.getElementById('ext-chips');
+          chips.style.display='flex';
+          chips.innerHTML=`
+            <div style="width:100%;background:#FEF2F2;border:0.5px solid #FECACA;border-radius:8px;padding:12px 14px;">
+              <p style="font-size:12px;font-weight:700;color:#991B1B;margin-bottom:6px;">No se encontraron colores en esta imagen</p>
+              <p style="font-size:11px;font-family:'DM Mono',monospace;color:#B91C1C;line-height:1.6;">
+                Posibles causas:<br>
+                · La imagen es casi completamente blanca, negra o gris<br>
+                · Es una captura de pantalla con muy poco color<br><br>
+                Qué puedes hacer:<br>
+                · Sube una imagen con colores más saturados<br>
+                · O ingresa los hex directamente en los inputs de arriba
+              </p>
+            </div>`;
+        }
+        return;
+      }
+
+      /* Step 2: Group by hue family (18° threshold).
+         Within each group, the representative is the pixel with HIGHEST chroma
+         — that's the purest, most intentional version of that color.
+         Count gives frequency (importance). */
+      const groups=[];
+      for(const px of pixels){
+        const g=groups.find(g=>{
+          const diff=Math.abs(g.rep.H-px.H);
+          return Math.min(diff,360-diff)<18;
+        });
+        if(g){
+          g.count++;
+          if(px.C>g.rep.C)g.rep=px; /* keep most saturated as representative */
+        }else{
+          groups.push({rep:px,count:1});
+        }
+      }
+
+      /* Step 3: Sort by count (frequency = importance in the design),
+         take top 5 distinct hue families */
+      const selected=groups
+        .sort((a,b)=>b.count-a.count)
+        .slice(0,5)
+        .map(g=>({
+          hex:r2h(g.rep.r,g.rep.g,g.rep.b),
+          count:g.count,
+          C:g.rep.C
+        }));
+
+      /* Step 4: Show chips + populate inputs */
+      const chips=document.getElementById('ext-chips');
+      chips.style.display='flex';
+      chips.innerHTML=
+        '<p style="font-size:10px;font-family:DM Mono,monospace;color:#bbb;width:100%;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">Extraídos — colores más frecuentes y saturados</p>'+
+        '<p style="font-size:10px;font-family:DM Mono,monospace;color:#ccc;width:100%;margin-bottom:8px;">Los colores similares en tono se agrupan en una familia. Ajusta el hex si necesitas precisión.</p>'+
+        selected.map(s=>`
+          <div class="ext-chip" onclick="copyH('${s.hex}')" title="Clic para copiar">
+            <div class="ext-dot" style="background:${s.hex}"></div>
+            ${s.hex}
+          </div>`).join('');
+
+      colors=[];
+      const names=['Principal','Secundario','Acento','Neutro','Quinto'];
+      selected.forEach((s,i)=>addColor(s.hex,names[i]));
+      dz.classList.remove('loading');
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+/* Drag and drop */
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragging');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragging'));
+dz.addEventListener('drop',e=>{
+  e.preventDefault();dz.classList.remove('dragging');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('image/'))extractImg({target:{files:e.dataTransfer.files,value:''}});
+});
+
+/* ─────────────────────────────────────────────
+   EXPORT SYSTEM
+───────────────────────────────────────────── */
+let expTab='css';
+/* Default semantic names — editable by user */
+const roleNames={
+  clickable:'clickable',hover:'hover',txt_main:'txt-main',txt_sec:'txt-sec',
+  bg_page:'bg-page',bg_card:'bg-card',highlight:'highlight',border:'border'
+};
+
+function renderRoleNameInputs(){
+  if(!gdata)return;
+  document.getElementById('exp-role-names').innerHTML=ROLES.map(r=>`
+    <div class="exp-role-row">
+      <div class="exp-role-dot" style="background:${roleHex(r.key)}"></div>
+      <span class="exp-role-key">${r.name}</span>
+      <input class="exp-role-input" type="text"
+        value="${roleNames[r.key]}"
+        placeholder="${r.key}"
+        oninput="roleNames['${r.key}']=this.value;renderExport()">
+    </div>`).join('');
+}
+
+function getPrefix(){
+  const v=(document.getElementById('exp-prefix')?.value||'color').trim();
+  return v||'color';
+}
+
+function setExpTab(tab,btn){
+  expTab=tab;
+  document.querySelectorAll('.exp-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderExport();
+}
+
+function renderExport(){
+  if(!gdata)return;
+  renderRoleNameInputs();
+  const pre=document.getElementById('exp-pre');
+  const hint=document.getElementById('exp-hint');
+  const stops=[50,100,200,300,400,500,600,700,800,900,950];
+  const prefix=getPrefix();
+
+  if(expTab==='css'){
+    const roleLines=ROLES.map(r=>{
+      const hex=roleHex(r.key);
+      const stop=mode==='light'?r.lightStop:r.darkStop;
+      const c=gdata[roleAssign[r.key]??0];
+      return `  --${prefix}-${roleNames[r.key]}: ${hex}; /* ${c.name} paso ${stop} */`;
+    }).join('\n');
+    const stateLines=stateAssign.length?'\n\n  /* Colores de estado */\n'+stateAssign.map(s=>{
+      const stop=mode==='light'?s.role.lightStop:s.role.darkStop;
+      const hex=s.color.scale[stop];
+      return `  --${prefix}-${s.role.key}: ${hex}; /* ${s.color.name} · ${s.role.name} */`;
+    }).join('\n'):'';
+    const scaleLines=gdata.map(c=>{
+      const name=c.name.toLowerCase().replace(/\s+/g,'-');
+      return stops.map(s=>`  --${prefix}-${name}-${s}: ${c.scale[s]};`).join('\n');
+    }).join('\n\n');
+    pre.textContent=`:root {\n  /* Roles semánticos */\n${roleLines}${stateLines}\n\n  /* Escalas completas */\n${scaleLines}\n}`;
+    hint.textContent='Pega en tu CSS global. Usa los roles semánticos en componentes — nunca los pasos de escala directamente.';
+  }
+  else if(expTab==='json'){
+    const obj={roles:{},scales:{}};
+    ROLES.forEach(r=>{
+      obj.roles[roleNames[r.key]]={
+        value:roleHex(r.key),type:'color',
+        description:r.desc,
+        source:gdata[roleAssign[r.key]??0].name,
+        stop:mode==='light'?r.lightStop:r.darkStop
+      };
+    });
+    gdata.forEach(c=>{
+      const name=c.name.toLowerCase().replace(/\s+/g,'-');
+      obj.scales[name]={};
+      stops.forEach(s=>obj.scales[name][s]={value:c.scale[s],type:'color'});
+    });
+    pre.textContent=JSON.stringify(obj,null,2);
+    hint.textContent='Compatible con Figma Tokens (plugin), Style Dictionary y Theo. Importa directamente en tu token pipeline.';
+  }
+  else if(expTab==='tailwind'){
+    const scaleObj=gdata.map(c=>{
+      const name=c.name.toLowerCase().replace(/\s+/g,'-');
+      const stopsObj=stops.map(s=>`          ${s}: '${c.scale[s]}'`).join(',\n');
+      return `      '${name}': {\n${stopsObj}\n      }`;
+    }).join(',\n');
+    const roleObj=ROLES.map(r=>`        '${roleNames[r.key]}': '${roleHex(r.key)}'`).join(',\n');
+    pre.textContent=`// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n        // Escalas\n${scaleObj},\n\n        // Roles semánticos\n        ${prefix}: {\n${roleObj}\n        }\n      }\n    }\n  }\n}`;
+    hint.textContent=`Usa clases como bg-${prefix}-${roleNames['clickable']}, text-${prefix}-${roleNames['txt_main']}, border-${prefix}-${roleNames['border']}, etc.`;
+  }
+}
+
+function copyExport(){
+  const text=document.getElementById('exp-pre').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('.exp-copy');
+    btn.textContent='Copiado ✓';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('copied');},2000);
+  }).catch(()=>showToast('Selecciona el texto manualmente'));
+}
+
+/* ─────────────────────────────────────────────
+   APP DARK MODE
+───────────────────────────────────────────── */
+let appDark=false;
+function toggleAppDark(){
+  appDark=!appDark;
+  document.body.classList.toggle('app-dark',appDark);
+  document.getElementById('app-dark-icon').textContent=appDark?'●':'◐';
+  showToast(appDark?'Modo oscuro activado':'Modo claro activado');
+}
+
+/* ─────────────────────────────────────────────
+   HEX INPUT VALIDATION
+───────────────────────────────────────────── */
+function updHex(id,v){
+  const c=colors.find(x=>x.id===id);if(!c)return;
+  const val=(v.startsWith('#')?v:'#'+v).toLowerCase();
+  c.hex=val;
+  const input=document.querySelector(`#r${id} .hinput`);
+  if(/^#[0-9a-f]{6}$/.test(val)){
+    const p=document.getElementById('p'+id);
+    if(p)p.style.background=val;
+    if(input){input.classList.remove('invalid');input.classList.add('valid');}
+  } else {
+    if(input){
+      input.classList.remove('valid');
+      if(v.length>=3)input.classList.add('invalid');
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────
+   ROLE CHANGE WITH ANIMATION
+───────────────────────────────────────────── */
+function changeRole(key,val){
+  roleAssign[key]=parseInt(val);
+  if(key==='clickable')roleAssign.hover=parseInt(val);
+
+  /* Animate the color strip of the changed card */
+  const strip=document.querySelector(`#rr-${key} .rcard-color-strip`);
+  if(strip){
+    strip.classList.remove('animating');
+    void strip.offsetWidth; /* force reflow to restart animation */
+    strip.classList.add('animating');
+    setTimeout(()=>strip.classList.remove('animating'),500);
+  }
+
+  renderAll();
+  showToast(`${ROLES.find(r=>r.key===key)?.name} actualizado`);
+}
+
+/* ─────────────────────────────────────────────
+   OVERRIDE renderAll TO INCLUDE EXPORT + STATE
+───────────────────────────────────────────── */
+function renderAll(){renderSum();renderRoleGrid();renderStateRoles();renderScales();renderPreview();renderExport();}
+
+/* ─────────────────────────────────────────────
+   STATE ROLES RENDER
+───────────────────────────────────────────── */
+function renderStateRoles(){
+  const card=document.getElementById('state-roles-card');
+  const grid=document.getElementById('state-role-grid');
+  if(!stateAssign||!stateAssign.length){card.style.display='none';return;}
+  card.style.display='block';
+
+  grid.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    ${stateAssign.map(s=>{
+      const stop=mode==='light'?s.role.lightStop:s.role.darkStop;
+      const hex=s.color.scale[stop];
+      const rOnWhite=cr(hex,'#ffffff');
+      const[lvl,cls]=wcagLabel(rOnWhite);
+      const crBlkS=cr(hex,'#000000'),crWhtS=cr(hex,'#ffffff');
+      const onColor=crBlkS>=crWhtS?'#111111':'#ffffff';
+      return`<div class="rcard" style="animation:fadeUp .4s var(--ease-out) both;">
+        <div class="rcard-color-strip" style="background:${hex};"></div>
+        <div class="rcard-body">
+          <div class="rcard-title">
+            <div class="rcard-dot" style="background:${hex}"></div>
+            ${s.role.name}
+            <span class="badge ${cls}" style="margin-left:auto;">${lvl} ${rOnWhite.toFixed(1)}:1</span>
+          </div>
+          <div class="rcard-desc">${s.role.desc}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin:10px 0 8px;">
+            <div style="width:44px;height:44px;border-radius:10px;background:${hex};border:0.5px solid rgba(0,0,0,.08);flex-shrink:0;"></div>
+            <div>
+              <p style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);">${hex} · paso ${stop}</p>
+            </div>
+          </div>
+          <div class="reasoning">
+            <p class="reasoning-winner" style="margin-bottom:0;">
+              ${s.role.usageHints}
+            </p>
+          </div>
+          <div style="margin-top:10px;">
+            <p style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink2);font-weight:500;margin-bottom:8px;">Cómo ve este color una persona con…</p>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:32px;height:32px;border-radius:7px;flex-shrink:0;background:${hex};border:0.5px solid rgba(0,0,0,.08);"></div>
+                <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);">Original · ${hex}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:32px;height:32px;border-radius:7px;flex-shrink:0;background:${cvdD(hex)};border:0.5px solid rgba(0,0,0,.08);"></div>
+                <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);">Deuteranopia · ${cvdD(hex)}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:32px;height:32px;border-radius:7px;flex-shrink:0;background:${cvdP(hex)};border:0.5px solid rgba(0,0,0,.08);"></div>
+                <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);">Protanopia · ${cvdP(hex)}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:32px;height:32px;border-radius:7px;flex-shrink:0;background:${cvdT(hex)};border:0.5px solid rgba(0,0,0,.08);"></div>
+                <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink3);">Tritanopia · ${cvdT(hex)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+/* ─────────────────────────────────────────────
+   ONBOARDING
+───────────────────────────────────────────── */
+function dismissOnboard(){
+  const el=document.getElementById('onboard');
+  el.classList.add('dismissed');
+  try{localStorage.setItem('csp-onboard','done');}catch(e){}
+}
+/* Auto-dismiss if seen before */
+try{if(localStorage.getItem('csp-onboard')==='done'){
+  const el=document.getElementById('onboard');
+  if(el)el.classList.add('dismissed');
+}}catch(e){}
+
+/* ─────────────────────────────────────────────
+   TOOLTIP — single global element, no inheritance
+───────────────────────────────────────────── */
+(function(){
+  const tip=document.getElementById('global-tip');
+  let hideTimer=null;
+
+  function show(wrap){
+    clearTimeout(hideTimer);
+    const text=wrap.getAttribute('data-tip');
+    if(!text)return;
+    const btn=wrap.querySelector('.help-btn');
+    if(btn){btn.style.background='#1a1a1a';btn.style.color='#f0efe9';btn.style.borderColor='transparent';}
+
+    tip.textContent=text;
+    tip.classList.add('visible');
+
+    const rect=wrap.getBoundingClientRect();
+    const tipW=280;
+    let left=rect.left;
+    if(left+tipW>window.innerWidth-12) left=window.innerWidth-tipW-12;
+    if(left<12) left=12;
+    const tipH=tip.offsetHeight;
+    tip.style.left=left+'px';
+    const spaceAbove=rect.top-tipH-10;
+    if(spaceAbove<8){
+      /* Not enough space above — show below */
+      tip.style.top=(rect.bottom+10)+'px';
+      tip.querySelector('::after'); /* reset arrow */
+      tip.setAttribute('data-dir','below');
+    } else {
+      tip.style.top=spaceAbove+'px';
+      tip.setAttribute('data-dir','above');
+    }
+  }
+
+  function hide(wrap){
+    hideTimer=setTimeout(()=>{
+      tip.classList.remove('visible');
+      const btn=wrap.querySelector('.help-btn');
+      if(btn){btn.style.background='';btn.style.color='';btn.style.borderColor='';}
+    },100);
+  }
+
+  document.querySelectorAll('.help-wrap').forEach(wrap=>{
+    wrap.addEventListener('mouseenter',()=>show(wrap));
+    wrap.addEventListener('mouseleave',()=>hide(wrap));
+  });
+  tip.addEventListener('mouseenter',()=>clearTimeout(hideTimer));
+  tip.addEventListener('mouseleave',()=>{
+    tip.classList.remove('visible');
+    document.querySelectorAll('.help-btn').forEach(b=>{b.style.background='';b.style.color='';b.style.borderColor='';});
+  });
+})();
+
+/* Init with 3 example colors */
+addColor('#3B6FE0','Primario');
+addColor('#0F172A','Oscuro');
+addColor('#F1F5F9','Claro');
+</script>
+</body>
+</html>
