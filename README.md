@@ -1,4 +1,5 @@
 # Color System Pro
+-AI made tool-
 
 **Herramienta profesional de design tokens con jerarquía inteligente, validación WCAG 2.1 y simulación de daltonismo.**
 
