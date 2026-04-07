@@ -1819,31 +1819,44 @@ function showToast(msg){
 ───────────────────────────────────────────── */
 function extractImg(e){
   const file=e.target.files[0];if(!file)return;
-  /* Show loading state */
   const dz=document.getElementById('dz');
   dz.classList.add('loading');
+
+  function abort(msg){
+    dz.classList.remove('loading');
+    const chips=document.getElementById('ext-chips');
+    chips.style.display='flex';
+    chips.innerHTML=`<div style="width:100%;background:#FEF2F2;border:0.5px solid #FECACA;border-radius:8px;padding:12px 14px;">
+      <p style="font-size:12px;font-weight:700;color:#991B1B;margin-bottom:4px;">No se pudo procesar la imagen</p>
+      <p style="font-size:12px;font-family:'DM Mono',monospace;color:#B91C1C;line-height:1.6;">${msg}</p>
+    </div>`;
+  }
+
   const reader=new FileReader();
+  reader.onerror=()=>abort('Error al leer el archivo. Intenta con otra imagen.');
   reader.onload=ev=>{
     const img=new Image();
+    img.onerror=()=>abort('El archivo no es una imagen válida o no pudo cargarse.');
     img.onload=()=>{
-      /* Resize to max 300px — balance between accuracy and speed */
-      const cv=document.getElementById('ic');
+      try{
+      /* Resize to max 300px */
+      let cv=document.getElementById('ic');
+      if(!cv){cv=document.createElement('canvas');cv.id='ic';cv.style.display='none';document.body.appendChild(cv);}
       const sc=Math.min(1,300/Math.max(img.width,img.height));
-      cv.width=Math.round(img.width*sc);
-      cv.height=Math.round(img.height*sc);
+      cv.width=Math.round(img.width*sc)||1;
+      cv.height=Math.round(img.height*sc)||1;
       const ctx=cv.getContext('2d');
       ctx.drawImage(img,0,0,cv.width,cv.height);
-      const d=ctx.getImageData(0,0,cv.width,cv.height).data;
+      let d;
+      try{d=ctx.getImageData(0,0,cv.width,cv.height).data;}
+      catch(err){abort('No se puede leer esta imagen por restricciones de seguridad del navegador. Guárdala localmente e inténtalo de nuevo.');return;}
 
-      /* Step 1: Read every pixel (no skipping), convert to OKLCH, filter neutrals.
-         Use adaptive chroma threshold: darks need less chroma to be intentional. */
       const pixels=[];
       for(let i=0;i<d.length;i+=4){
-        if(d[i+3]<230)continue; /* skip transparent/semi-transparent */
+        if(d[i+3]<230)continue;
         const r=d[i],g=d[i+1],b=d[i+2];
         const[L,C,H]=rgb2oklch(r,g,b);
-        if(L>0.97||L<0.04)continue; /* skip pure white / pure black */
-        /* Adaptive chroma threshold by lightness zone */
+        if(L>0.97||L<0.04)continue;
         const minC=L<0.25?0.015:L>0.88?0.035:0.05;
         if(C<minC)continue;
         pixels.push({r,g,b,L,C,H});
@@ -1851,18 +1864,16 @@ function extractImg(e){
 
       if(!pixels.length){
         dz.classList.remove('loading');
-        /* Dead end fix: lower thresholds and retry before giving up */
         const fallback=[];
         for(let i=0;i<d.length;i+=4){
           if(d[i+3]<200)continue;
           const r=d[i],g=d[i+1],b=d[i+2];
           const[L,C,H]=rgb2oklch(r,g,b);
           if(L>0.98||L<0.02)continue;
-          if(C<0.008)continue; /* very permissive fallback */
+          if(C<0.008)continue;
           fallback.push({r,g,b,L,C,H});
         }
         if(fallback.length){
-          /* Use fallback pixels but show a warning */
           const fgroups=[];
           for(const px of fallback){
             const fg=fgroups.find(g=>Math.min(Math.abs(g.rep.H-px.H),360-Math.abs(g.rep.H-px.H))<25);
@@ -1880,70 +1891,33 @@ function extractImg(e){
           const names=['Principal','Secundario','Acento','Neutro'];
           fselected.forEach((s,i)=>addColor(s.hex,names[i]));
         } else {
-          /* True dead end — give clear instructions */
-          const chips=document.getElementById('ext-chips');
-          chips.style.display='flex';
-          chips.innerHTML=`
-            <div style="width:100%;background:#FEF2F2;border:0.5px solid #FECACA;border-radius:8px;padding:12px 14px;">
-              <p style="font-size:12px;font-weight:700;color:#991B1B;margin-bottom:6px;">No se encontraron colores en esta imagen</p>
-              <p style="font-size:12px;font-family:'DM Mono',monospace;color:#B91C1C;line-height:1.6;">
-                Posibles causas:<br>
-                · La imagen es casi completamente blanca, negra o gris<br>
-                · Es una captura de pantalla con muy poco color<br><br>
-                Qué puedes hacer:<br>
-                · Sube una imagen con colores más saturados<br>
-                · O ingresa los hex directamente en los inputs de arriba
-              </p>
-            </div>`;
+          abort('La imagen no tiene colores suficientemente saturados.<br>· Intenta con una imagen más colorida<br>· O ingresa los hex directamente');
         }
         return;
       }
 
-      /* Step 2: Group by hue family (18° threshold).
-         Within each group, the representative is the pixel with HIGHEST chroma
-         — that's the purest, most intentional version of that color.
-         Count gives frequency (importance). */
       const groups=[];
       for(const px of pixels){
-        const g=groups.find(g=>{
-          const diff=Math.abs(g.rep.H-px.H);
-          return Math.min(diff,360-diff)<18;
-        });
-        if(g){
-          g.count++;
-          if(px.C>g.rep.C)g.rep=px; /* keep most saturated as representative */
-        }else{
-          groups.push({rep:px,count:1});
-        }
+        const g=groups.find(g=>{const diff=Math.abs(g.rep.H-px.H);return Math.min(diff,360-diff)<18;});
+        if(g){g.count++;if(px.C>g.rep.C)g.rep=px;}
+        else groups.push({rep:px,count:1});
       }
 
-      /* Step 3: Sort by count (frequency = importance in the design),
-         take top 5 distinct hue families */
-      const selected=groups
-        .sort((a,b)=>b.count-a.count)
-        .slice(0,5)
-        .map(g=>({
-          hex:r2h(g.rep.r,g.rep.g,g.rep.b),
-          count:g.count,
-          C:g.rep.C
-        }));
+      const selected=groups.sort((a,b)=>b.count-a.count).slice(0,5)
+        .map(g=>({hex:r2h(g.rep.r,g.rep.g,g.rep.b),count:g.count,C:g.rep.C}));
 
-      /* Step 4: Show chips + populate inputs */
       const chips=document.getElementById('ext-chips');
       chips.style.display='flex';
       chips.innerHTML=
         '<p style="font-size:12px;font-family:DM Mono,monospace;color:var(--ink2);width:100%;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase;">Extraídos — colores más frecuentes y saturados</p>'+
         '<p style="font-size:12px;font-family:DM Mono,monospace;color:var(--ink2);width:100%;margin-bottom:8px;">Los colores similares en tono se agrupan en una familia. Ajusta el hex si necesitas precisión.</p>'+
-        selected.map(s=>`
-          <div class="ext-chip" onclick="copyH('${s.hex}')" title="Clic para copiar">
-            <div class="ext-dot" style="background:${s.hex}"></div>
-            ${s.hex}
-          </div>`).join('');
+        selected.map(s=>`<div class="ext-chip" onclick="copyH('${s.hex}')" title="Clic para copiar"><div class="ext-dot" style="background:${s.hex}"></div>${s.hex}</div>`).join('');
 
       colors=[];
       const names=['Principal','Secundario','Acento','Neutro','Quinto'];
       selected.forEach((s,i)=>addColor(s.hex,names[i]));
       dz.classList.remove('loading');
+      }catch(err){abort('Error inesperado al procesar la imagen: '+err.message);}
     };
     img.src=ev.target.result;
   };
