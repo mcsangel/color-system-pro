@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Color System Pro — Logo</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@100;400;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#f2f1ee;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.stage{width:900px;height:500px;background:#f2f1ee;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border-radius:20px;}
+
+/* P1: HEX */
+.hex-input{position:absolute;display:flex;align-items:center;opacity:0;}
+.hex-hash{font-family:'DM Mono',monospace;font-size:52px;font-weight:400;color:#ccc;line-height:1;}
+.hex-val{font-family:'DM Mono',monospace;font-size:52px;font-weight:500;color:#111;line-height:1;letter-spacing:.04em;}
+.hex-cursor{width:3px;height:52px;background:#7C3AED;margin-left:4px;animation:blink .7s steps(1) infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* P2: SCALE */
+.scale-wrap{position:absolute;display:flex;flex-direction:column;gap:8px;opacity:0;width:700px;}
+.scale-label{font-family:'DM Mono',monospace;font-size:9px;color:#bbb;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px;}
+.scale-row{display:flex;gap:3px;border-radius:6px;overflow:hidden;height:36px;}
+.sw{flex:1;height:36px;transform:scaleY(0);transform-origin:bottom;transition:transform .3s cubic-bezier(.16,1,.3,1);}
+
+/* P3: ROLES */
+.roles-wrap{position:absolute;display:flex;gap:7px;opacity:0;flex-wrap:wrap;width:660px;justify-content:center;}
+.role-pill{font-family:'DM Mono',monospace;font-size:10px;padding:5px 14px;border-radius:99px;border:.5px solid transparent;transform:translateY(8px);opacity:0;transition:all .4s cubic-bezier(.16,1,.3,1);}
+.role-pill.vis{transform:translateY(0);opacity:1;}
+
+/* P4: LOGO */
+.logo-wrap{position:absolute;display:flex;align-items:baseline;opacity:0;}
+
+.cs-clip{overflow:hidden;line-height:.95;}
+.cs-inner{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:92px;font-weight:900;
+  letter-spacing:.03em;text-transform:uppercase;
+  color:#111;line-height:.95;
+  display:block;
+  transform:translateY(100%);
+  transition:transform .85s cubic-bezier(.16,1,.3,1);
+}
+.cs-inner.vis{transform:translateY(0) !important;}
+
+.pro-wrap{display:flex;align-items:flex-end;margin-left:12px;padding-bottom:12px;}
+.pro-clip{overflow:hidden;height:54px;display:flex;align-items:flex-end;}
+.pro-inner{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:40px;font-weight:900;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:#7C3AED;line-height:1;
+  display:block;
+  transform:translateY(100%);
+  transition:transform .85s cubic-bezier(.16,1,.3,1);
+}
+.pro-inner.vis{transform:translateY(0) !important;}
+
+/* META */
+.tagline{position:absolute;bottom:48px;left:60px;font-family:'DM Mono',monospace;font-size:10px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:#bbb;opacity:0;transition:opacity .8s ease;}
+.tagline.vis{opacity:1;}
+.dot{position:absolute;top:46px;left:60px;width:5px;height:5px;border-radius:50%;background:#7C3AED;opacity:0;transition:opacity .4s ease;}
+.dot.vis{opacity:1;}
+.meta{position:absolute;top:44px;right:60px;text-align:right;opacity:0;transition:opacity .8s ease;}
+.meta.vis{opacity:1;}
+.meta-name{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ccc;}
+.meta-year{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:#ddd;margin-top:2px;letter-spacing:.06em;}
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="hex-input" id="hexInput">
+    <span class="hex-hash">#</span>
+    <span class="hex-val" id="hexVal"></span>
+    <div class="hex-cursor" id="hexCursor"></div>
+  </div>
+
+  <div class="scale-wrap" id="scaleWrap">
+    <div class="scale-label" id="scaleLabel"></div>
+    <div class="scale-row" id="scaleRow1"></div>
+    <div class="scale-row" id="scaleRow2"></div>
+    <div class="scale-row" id="scaleRow3"></div>
+  </div>
+
+  <div class="roles-wrap" id="rolesWrap">
+    <div class="role-pill" id="r0">clickable</div>
+    <div class="role-pill" id="r1">hover</div>
+    <div class="role-pill" id="r2">txt-main</div>
+    <div class="role-pill" id="r3">txt-sec</div>
+    <div class="role-pill" id="r4">bg-page</div>
+    <div class="role-pill" id="r5">bg-card</div>
+    <div class="role-pill" id="r6">success</div>
+    <div class="role-pill" id="r7">warning</div>
+    <div class="role-pill" id="r8">error</div>
+    <div class="role-pill" id="r9">info</div>
+    <div class="role-pill" id="r10">highlight</div>
+    <div class="role-pill" id="r11">border</div>
+  </div>
+
+  <div class="logo-wrap" id="logoWrap">
+    <div class="cs-clip">
+      <span class="cs-inner" id="csInner">Color System</span>
+    </div>
+    <div class="pro-wrap">
+      <div class="pro-clip"><span class="pro-inner" id="proP">P</span></div>
+      <div class="pro-clip"><span class="pro-inner" id="proR">R</span></div>
+      <div class="pro-clip"><span class="pro-inner" id="proO">O</span></div>
+    </div>
+  </div>
+
+  <div class="dot" id="dot"></div>
+  <div class="tagline" id="tagline">Design Tool · OKLCH · WCAG 2.1 · 2026</div>
+  <div class="meta" id="meta">
+    <div class="meta-name">MCSangel</div>
+    <div class="meta-year">© 2026</div>
+  </div>
+
+</div>
+<script>
+function oklch2rgb(L,C,H){
+  const a=C*Math.cos(H*Math.PI/180),b=C*Math.sin(H*Math.PI/180);
+  const l_=L+.3963377774*a+.2158037573*b,m_=L-.1055613458*a-.0638541728*b,s_=L-.0894841775*a-1.2914855480*b;
+  const lv=l_*l_*l_,mv=m_*m_*m_,sv=s_*s_*s_;
+  const r=4.0767416621*lv-3.3077115913*mv+.2309699292*sv;
+  const g=-1.2684380046*lv+2.6097574011*mv-.3413193965*sv;
+  const bl=-0.0041960863*lv-.7034186147*mv+1.7076147010*sv;
+  const c=v=>Math.max(0,Math.min(255,Math.round((v<=.0031308?v*12.92:1.055*Math.pow(v,1/2.4)-.055)*255)));
+  return`rgb(${c(r)},${c(g)},${c(bl)})`;
+}
+function makeScale(L,C,H){
+  return[.98,.93,.85,.75,.65,.55,.42,.32,.22,.14,.08].map((l,i)=>{
+    if(i===5)return oklch2rgb(L,C,H);
+    const t=i<5?(5-i)/5:(i-5)/5;
+    return oklch2rgb(Math.max(0,Math.min(1,i<5?L+(0.985-L)*t:L+(0.08-L)*t)),Math.max(0,C*(1-t*.72)),H);
+  });
+}
+
+const palettes=[
+  {hex:'7C3AED',L:.49,C:.248,H:304},
+  {hex:'22C55E',L:.65,C:.195,H:142},
+  {hex:'F59E0B',L:.71,C:.183,H:72},
+  {hex:'E24B4A',L:.52,C:.22,H:27},
+  {hex:'3B82F6',L:.55,C:.20,H:264},
+];
+const roleColors=['#7C3AED','#5B21B6','#111','#555','#aaa','#ddd','#16A34A','#B45309','#A32D2D','#185FA5','#C4B5FD','#DDD6FE'];
+let pIdx=0;
+
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+
+function fadeTo(el,val,ms=400){
+  return new Promise(r=>{
+    el.style.transition=`opacity ${ms}ms ease`;
+    el.style.opacity=val;
+    setTimeout(r,ms);
+  });
+}
+
+async function typeHex(str){
+  const el=document.getElementById('hexVal');
+  el.textContent='';
+  for(let i=0;i<str.length;i++){await delay(75);el.textContent=str.slice(0,i+1);}
+}
+
+async function buildScale(pal){
+  document.getElementById('scaleLabel').textContent=`#${pal.hex} · escala OKLCH · 11 pasos`;
+  ['scaleRow1','scaleRow2','scaleRow3'].forEach((id,ri)=>{
+    const row=document.getElementById(id);
+    row.innerHTML='';
+    makeScale([.82,.55,.28][ri],pal.C,pal.H).forEach((c,ci)=>{
+      const sw=document.createElement('div');
+      sw.className='sw';sw.style.background=c;row.appendChild(sw);
+      setTimeout(()=>sw.style.transform='scaleY(1)',ci*40+ri*100);
+    });
+  });
+}
+
+async function showRoles(){
+  for(let i=0;i<12;i++){
+    await delay(75);
+    const p=document.getElementById('r'+i);
+    p.style.borderColor=roleColors[i];p.style.color=roleColors[i];
+    p.classList.add('vis');
+  }
+}
+
+async function showLogo(){
+  const wrap=document.getElementById('logoWrap');
+  wrap.style.transition='none';
+  wrap.style.opacity='1';
+
+  await delay(60);
+  document.getElementById('csInner').classList.add('vis');
+
+  await delay(300);
+  document.getElementById('proP').classList.add('vis');
+  await delay(100);
+  document.getElementById('proR').classList.add('vis');
+  await delay(100);
+  document.getElementById('proO').classList.add('vis');
+
+  await delay(1200);
+  document.getElementById('dot').classList.add('vis');
+  document.getElementById('tagline').classList.add('vis');
+  document.getElementById('meta').classList.add('vis');
+}
+
+async function morphPRO(){
+  await delay(5000);
+  ['proP','proR','proO'].forEach((id,i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById(id);
+      el.style.transition='font-weight .6s ease, letter-spacing .6s ease, color .6s ease';
+      el.style.fontWeight='100';el.style.letterSpacing='.18em';el.style.color='rgba(124,58,237,.35)';
+    },i*80);
+  });
+  await delay(900);
+  ['proP','proR','proO'].forEach((id,i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById(id);
+      el.style.fontWeight='900';el.style.letterSpacing='.08em';el.style.color='#7C3AED';
+    },i*80);
+  });
+}
+
+function hardReset(){
+  /* Pro letters — remove vis, clear ALL inline styles, force reflow */
+  ['proP','proR','proO'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.classList.remove('vis');
+    el.removeAttribute('style');
+    void el.offsetWidth;
+  });
+  /* CS */
+  const cs=document.getElementById('csInner');
+  cs.classList.remove('vis');
+  cs.removeAttribute('style');
+  void cs.offsetWidth;
+  /* Logo wrap */
+  const wrap=document.getElementById('logoWrap');
+  wrap.style.transition='none';
+  wrap.style.opacity='0';
+  /* Meta */
+  ['dot','tagline','meta'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.classList.remove('vis');
+    el.style.transition='none';
+  });
+  /* Roles */
+  for(let i=0;i<12;i++) document.getElementById('r'+i).classList.remove('vis');
+  /* Scale */
+  ['scaleRow1','scaleRow2','scaleRow3'].forEach(id=>{
+    document.getElementById(id).querySelectorAll('.sw').forEach(sw=>{
+      sw.style.transition='none';sw.style.transform='scaleY(0)';
+    });
+  });
+}
+
+async function run(){
+  const pal=palettes[pIdx%palettes.length];pIdx++;
+
+  /* P1 */
+  const hi=document.getElementById('hexInput');
+  document.getElementById('hexCursor').style.display='block';
+  await fadeTo(hi,'1',300);
+  await typeHex(pal.hex);
+  await delay(500);
+  document.getElementById('hexCursor').style.display='none';
+  await fadeTo(hi,'0',400);
+  await delay(200);
+
+  /* P2 */
+  const sw=document.getElementById('scaleWrap');
+  await fadeTo(sw,'1',300);
+  await buildScale(pal);
+  await delay(1500);
+  await fadeTo(sw,'0',500);
+  await delay(200);
+
+  /* P3 */
+  const rw=document.getElementById('rolesWrap');
+  await fadeTo(rw,'1',300);
+  await showRoles();
+  await delay(1300);
+  await fadeTo(rw,'0',500);
+  await delay(200);
+  for(let i=0;i<12;i++) document.getElementById('r'+i).classList.remove('vis');
+
+  /* P4 */
+  await showLogo();
+  morphPRO();
+
+  /* Hold */
+  await delay(9000);
+
+  /* Fade out logo */
+  await fadeTo(document.getElementById('logoWrap'),'0',600);
+  ['dot','tagline','meta'].forEach(id=>{
+    document.getElementById(id).style.transition='opacity .6s ease';
+    document.getElementById(id).classList.remove('vis');
+  });
+  await delay(700);
+
+  hardReset();
+  await delay(300);
+  run();
+}
+
+document.fonts.ready.then(()=>{setTimeout(run,200);});
+</script>
+</body>
+</html>
